@@ -14,7 +14,7 @@ public class Layer implements Iterable<Neuron> {
 		}
 		this.neuronList = new ArrayList<>();
 		for (int i= 0; i < numberOfNeurons; i++) {
-			Neuron neuron = new Neuron(input[i],
+			Neuron neuron = new Neuron(input == null ? 0 : input[i],
 							Math.random(),
 							tfunction
 					);
@@ -22,6 +22,10 @@ public class Layer implements Iterable<Neuron> {
 		}
 	}
 
+	public int size(){
+		return neuronList.size();
+	}
+	
 	public Layer(Neuron ... neurons) {
 		for (Neuron n : neurons) {
 			neuronList.add(n);

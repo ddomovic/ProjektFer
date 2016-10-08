@@ -37,7 +37,7 @@ public class Neuron {
 			Neuron inputNeuron = connection.getLeft();
 			sum += inputNeuron.calculateOutput() * connection.getWeight();
 		}
-		output = tfunction.applyFunction(sum);
+		output = tfunction.applyFunction(sum+bias);
 		return output;
 	}
 
@@ -74,6 +74,10 @@ public class Neuron {
 	 */
 	public void addInConnection(Connection con) {
 		Inconnections.add(con);
+	}
+	
+	public void setInput(double input){
+		this.input = input;
 	}
 
 	public ArrayList<Connection> getAllInConnections() {
