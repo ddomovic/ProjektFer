@@ -5,7 +5,6 @@ import java.util.HashMap;
 public class Neuron {
 	private static int COUNTER = 0;
 	private int id;
-
 	double output;
 	double input = 0;
 	//lista ulaznih konekcija u neuron
@@ -35,13 +34,16 @@ public class Neuron {
 
 		double sum = input;
 		for(Connection connection : Inconnections){
-			Neuron inputNeuron = connection.getInput();
+			Neuron inputNeuron = connection.getLeft();
 			sum += inputNeuron.calculateOutput() * connection.getWeight();
 		}
 		output = tfunction.applyFunction(sum);
 		return output;
 	}
 
+	public void reset(){
+		output = 0;
+	}
 	/**
 	 * Metoda za istovremeno dodavanje vise konekcija trenutnom neuronu
 	 * @param inNeurons

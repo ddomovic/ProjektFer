@@ -8,12 +8,13 @@ public class Layer implements Iterable<Neuron> {
 
 	private List<Neuron> neuronList;
 
-	public Layer(boolean isFirstLayer, int numberOfNeurons, ITransferFunction tfunction) {
-		super();
+	public Layer(double[] input ,int numberOfNeurons, ITransferFunction tfunction) throws Exception {
+		if(input.length != numberOfNeurons){
+			throw new Exception("velicina polja mora biti ista ko i broj neurona");
+		}
 		this.neuronList = new ArrayList<>();
 		for (int i= 0; i < numberOfNeurons; i++) {
-			Neuron neuron = new Neuron(
-					isFirstLayer ? 0 : Math.random(),
+			Neuron neuron = new Neuron(input[i],
 							Math.random(),
 							tfunction
 					);

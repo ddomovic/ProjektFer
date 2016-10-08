@@ -20,7 +20,7 @@ public class NeuralNetwork {
 	}
 	
 	private void connectLayers(){
-		for(int i = 0; i< layerList.size(); i++){
+		for(int i = 0; i< layerList.size()-1; i++){
 			layerList.get(i).connect(layerList.get(i+1));
 		}
 	}
