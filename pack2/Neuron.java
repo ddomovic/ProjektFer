@@ -4,43 +4,49 @@ import java.util.HashMap;
 
 
 public class Neuron {
-	private static int counter = 0;
+	private static int COUNTER = 0;
 	private int id;
+
 	double output;
 	double input = 0;
 	//lista ulaznih konekcija u neuron
 	ArrayList<Connection> Inconnections = new ArrayList<Connection>();
 	//Mapa za dohvacanje i pregled konekcija na neuron izvana
 	HashMap<Integer, Connection> connectionLookup = new HashMap<Integer, Connection>();
-	
-	public Neuron() {
-		this.id = counter;
-		counter++;
+
+	private ITransferFunction tfunction;
+	private double bias;
+
+	public Neuron(ITransferFunction tfunction) {
+		this(0, 0, tfunction);
 	}
-	
-	public Neuron(double input){
+
+	public Neuron(double input, double bias, ITransferFunction tfunction){
 		this.input = input;
+		this.bias = bias;
+		this.id = COUNTER++;
+		this.tfunction = tfunction;
 	}
-	
-	//ovo treba za racunati izlaz
-	private double sigmoid(double x) {
-		return 1.0 / (1.0 + (Math.exp(-x)));
-	}
-	
+
 	/**
 	 * Metoda koja vraca izlaz neurona
 	 * @return output
-	 * 
+	 *
 	 */
 	public double calculateOutput(){
+		if (output != 0) {
+			return output;
+		}
+
 		double sum = input;
 		for(Connection connection : Inconnections){
 			Neuron inputNeuron = connection.getLeft();
-			sum += inputNeuron.calculateOutput()*connection.getWeight(); 
+			sum += inputNeuron.calculateOutput()*connection.getWeight();
 		}
-		return sum;
+		output = tfunction.applyFunction(sum);
+		return output;
 	}
-	
+
 	/**
 	 * Metoda za istovremeno dodavanje vise konekcija trenutnom neuronu
 	 * @param inNeurons
@@ -53,7 +59,7 @@ public class Neuron {
 			connectionLookup.put(n.id, con);
 		}
 	}
-	
+
 	/**
 	 * Metoda koja nam vraca konekciju neurona nad kojim zovemo sa neuronom iz argumenta
 	 * @param Index lijevog neurona
@@ -63,7 +69,7 @@ public class Neuron {
 	public Connection getConnection(int neuronIndex) {
 		return connectionLookup.get(neuronIndex);
 	}
-	
+
 	/**
 	 * Metoda za dodavanje konekcija trenutnom neuronu
 	 * @param connection
@@ -72,7 +78,7 @@ public class Neuron {
 	public void addInConnection(Connection con) {
 		Inconnections.add(con);
 	}
-	
+
 	public ArrayList<Connection> getAllInConnections() {
 		return Inconnections;
 	}
