@@ -7,7 +7,7 @@ public class Neuron {
 	private static int counter = 0;
 	private int id;
 	double output;
-	
+	double input = 0;
 	//lista ulaznih konekcija u neuron
 	ArrayList<Connection> Inconnections = new ArrayList<Connection>();
 	//Mapa za dohvacanje i pregled konekcija na neuron izvana
@@ -16,6 +16,10 @@ public class Neuron {
 	public Neuron() {
 		this.id = counter;
 		counter++;
+	}
+	
+	public Neuron(double input){
+		this.input = input;
 	}
 	
 	//ovo treba za racunati izlaz
@@ -29,8 +33,12 @@ public class Neuron {
 	 * 
 	 */
 	public double calculateOutput(){
-		//TODO - naci matematicki nacin na koji se racuna izlaz neurona i implementirati ga
-		return 1;
+		double sum = input;
+		for(Connection connection : Inconnections){
+			Neuron inputNeuron = connection.getLeft();
+			sum += inputNeuron.calculateOutput()*connection.getWeight(); 
+		}
+		return sum;
 	}
 	
 	/**

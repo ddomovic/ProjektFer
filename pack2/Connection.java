@@ -11,7 +11,6 @@ public class Connection {
 	private double weight;
 	private static int counter = 0;
 	private int id = 0;
-	
 	//originalno sam mislio i weight odmah u konstruktoru setat, ali ispada da nam to komplicira
 	//zivot pri inicijalizaciji na random vrijednosti -Nikola
 	public Connection(Neuron left, Neuron right){
@@ -45,7 +44,7 @@ public class Connection {
 	 * @author Nikola
 	 */
     public void setWeight(double w) {
-        weight = w;
+    	weight = w;
     }
     
     /**
