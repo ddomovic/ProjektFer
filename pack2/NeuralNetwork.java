@@ -1,6 +1,6 @@
 package pack2;
 
-public class NeuralNetowrk {
+public class NeuralNetwork {
 
 
 	//The magic happens here

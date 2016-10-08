@@ -2,7 +2,6 @@ package pack2;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class Neuron {
 	private static int COUNTER = 0;
 	private int id;
@@ -16,10 +15,6 @@ public class Neuron {
 
 	private ITransferFunction tfunction;
 	private double bias;
-
-	public Neuron(ITransferFunction tfunction) {
-		this(0, 0, tfunction);
-	}
 
 	public Neuron(double input, double bias, ITransferFunction tfunction){
 		this.input = input;
@@ -40,8 +35,8 @@ public class Neuron {
 
 		double sum = input;
 		for(Connection connection : Inconnections){
-			Neuron inputNeuron = connection.getLeft();
-			sum += inputNeuron.calculateOutput()*connection.getWeight();
+			Neuron inputNeuron = connection.getInput();
+			sum += inputNeuron.calculateOutput() * connection.getWeight();
 		}
 		output = tfunction.applyFunction(sum);
 		return output;
