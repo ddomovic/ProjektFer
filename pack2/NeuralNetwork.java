@@ -10,8 +10,8 @@ public class NeuralNetwork {
 		this.layerList = new ArrayList<>();
 	}
 	
-	public void addLayer(double[] input ,int numberOfNeurons, ITransferFunction tfunction) throws Exception{
-		Layer layer = new Layer(input,numberOfNeurons,tfunction);
+	public void addLayer(int numberOfNeurons, ITransferFunction tfunction) throws Exception{
+		Layer layer = new Layer(numberOfNeurons,tfunction);
 		layerList.add(layer);
 	}
 	
@@ -44,9 +44,9 @@ public class NeuralNetwork {
 	public static void main(String[] args) throws Exception {
 		NeuralNetwork network = new NeuralNetwork();
 		double[] input = {7.0,16.0,3.0};
-		network.addLayer(input, 3 , new SigmoidTransferFunction());
-		network.addLayer(null, 4, new SigmoidTransferFunction());
-		network.addLayer(null, 2, new SigmoidTransferFunction());
+		network.addLayer(3 , new SigmoidTransferFunction());
+		network.addLayer(4, new SigmoidTransferFunction());
+		network.addLayer(2, new SigmoidTransferFunction());
 		network.connectLayers();
 		double[] output = network.run(input);
 		for(double out : output){

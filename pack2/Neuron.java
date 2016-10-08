@@ -15,8 +15,7 @@ public class Neuron {
 	private ITransferFunction tfunction;
 	private double bias;
 
-	public Neuron(double input, double bias, ITransferFunction tfunction){
-		this.input = input;
+	public Neuron(double bias, ITransferFunction tfunction){
 		this.bias = bias;
 		this.id = COUNTER++;
 		this.tfunction = tfunction;
