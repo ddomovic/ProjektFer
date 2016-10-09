@@ -2,28 +2,61 @@ package pack2;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Predstavlja neuron.
+ *
+ * @version 1.0
+ */
 public class Neuron {
+	/**
+	 * Brojac neurona.
+	 */
 	private static int COUNTER = 0;
-	private int id;
-	double output;
-	double input = 0;
-	//lista ulaznih konekcija u neuron
-	ArrayList<Connection> Inconnections = new ArrayList<Connection>();
-	//Mapa za dohvacanje i pregled konekcija na neuron izvana
-	HashMap<Integer, Connection> connectionLookup = new HashMap<Integer, Connection>();
 
+	/**
+	 * ID neurona.
+	 */
+	private int id;
+	/**
+	 * Izlaz neurona
+	 */
+	private double output;
+	/**
+	 * Ulaz neurona
+	 */
+	private double input = 0d;
+	/**
+	 * Konekcije koje ulaze u neuron
+	 */
+	private ArrayList<Connection> Inconnections = new ArrayList<Connection>();
+	/**
+	 * Mapira id neurona na konekciju kojom je spojen na ovaj neuron
+	 */
+	private HashMap<Integer, Connection> connectionLookup = new HashMap<Integer, Connection>();
+	/**
+	 * Transferna(aktivacijska) funkcija
+	 */
 	private ITransferFunction tfunction;
+	/**
+	 * Bias
+	 */
 	private double bias;
 
-	public Neuron(double bias, ITransferFunction tfunction){
-		this.bias = bias;
+	/**
+	 * Stvori i inicijalizira novi neuron.
+	 *
+	 * @param tfunction transferna funkcija
+	 */
+	public Neuron(ITransferFunction tfunction){
+		this.bias = Math.random() * 2 - 1;
 		this.id = COUNTER++;
 		this.tfunction = tfunction;
 	}
 
 	/**
-	 * Metoda koja vraca izlaz neurona
-	 * @return output
+	 * Metoda koja izračunava izlaz neurona
+	 *
+	 * @return output double vrijednost izlaza
 	 *
 	 */
 	public double calculateOutput(){
@@ -36,17 +69,21 @@ public class Neuron {
 			Neuron inputNeuron = connection.getLeft();
 			sum += inputNeuron.calculateOutput() * connection.getWeight();
 		}
-		output = tfunction.applyFunction(sum+bias);
+		output = tfunction.applyFunction(sum + bias);
 		return output;
 	}
 
+	/**
+	 * Sluzi za resetiranje vrijednosti izlaza neurona
+	 */
 	public void reset(){
 		output = 0;
 	}
+
 	/**
 	 * Metoda za istovremeno dodavanje vise konekcija trenutnom neuronu
-	 * @param inNeurons
-	 * @author Nikola
+	 *
+	 * @param inNeurons lista ulaznih neurona
 	 */
 	public void addInConnectionsS(ArrayList<Neuron> inNeurons) {
 		for (Neuron n : inNeurons) {
@@ -57,10 +94,10 @@ public class Neuron {
 	}
 
 	/**
-	 * Metoda koja nam vraca konekciju neurona nad kojim zovemo sa neuronom iz argumenta
-	 * @param Index lijevog neurona
-	 * @return Connection
-	 * @author Nikola
+	 * Metoda koja vraca konekciju neurona za dani index neurona
+	 *
+	 * @param neuronIndex index neurona za kojeg trazimo konekciju
+	 * @return Connection konekciju neurona
 	 */
 	public Connection getConnection(int neuronIndex) {
 		return connectionLookup.get(neuronIndex);
@@ -68,17 +105,28 @@ public class Neuron {
 
 	/**
 	 * Metoda za dodavanje konekcija trenutnom neuronu
-	 * @param connection
-	 * @author Nikola
+	 *
+	 * @param con nova ulazna konekcija
 	 */
 	public void addInConnection(Connection con) {
 		Inconnections.add(con);
 	}
-	
+
+	/**
+	 * Postavlja input neurona.
+	 * <br> Ova metoda se treba koristit samo za postavlja neurona input layera.
+	 *
+	 * @param input
+	 */
 	public void setInput(double input){
 		this.input = input;
 	}
 
+	/**
+	 * Vraća listu svih ulaznih konekcija.
+	 *
+	 * @return lista konekcija
+	 */
 	public ArrayList<Connection> getAllInConnections() {
 		return Inconnections;
 	}

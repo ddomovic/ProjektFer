@@ -1,5 +1,10 @@
 package pack2;
 
+/**
+ * Aktivacijska funkcija sigmoidalnih neurona.
+ *
+ * @version 1.0
+ */
 public class SigmoidTransferFunction implements ITransferFunction {
 
 	@Override
