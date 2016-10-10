@@ -1,31 +1,51 @@
 package pack2;
+
 /**
- * klasa koja predstavlja jednu konekciju izmedu dva neurona
- * @author Nikola,
+ * Razred koji predstavlja jednu konekciju izmedu dva neurona
  *
+ * @version 1.0
  */
-//koristimo klasu, a ne polja jer cemo poslije trebati jos informacija prenositi + ovo je najpoopcenitijiji
-//nacin na koji to mozemo izvesti -Nikola
 public class Connection {
-	private final Neuron left;
-	private final Neuron right;
-	private double weight;
+	/**
+	 * Counter konekcija
+	 */
 	private static int COUNTER = 0;
+
+	/**
+	 * Lijevi neuron konekcije
+	 */
+	private final Neuron left;
+	/**
+	 * Desni neuron konekcije
+	 */
+	private final Neuron right;
+	/**
+	 * Tezina veze izmedu dva neurona
+	 */
+	private double weight;
+	/**
+	 * ID konekcije
+	 */
 	private int id;
 
-
+	/**
+	 * Stvori i inicijalizira novu konekciju izmedu dva neurona.
+	 *
+	 * @param left lijevi neuron
+	 * @param right desni neuron
+	 */
 	public Connection(Neuron left, Neuron right){
 		this.left = left;
 		this.right = right;
-		this.weight = Math.random();
+		this.weight = Math.random() * 2 - 1;
 		this.id = COUNTER++;
 		right.addInConnection(this);
 	}
 
 	/**
 	 * Metoda za dobivanje ID konekcije nad kojom se zove
+	 *
 	 * @return ID
-	 * @author Nikola
 	 */
 	public int getId(){
 		return id;
@@ -33,8 +53,8 @@ public class Connection {
 
 	/**
 	 * Metoda koja vraca tezinu konekcije nad kojom se zove
+	 *
 	 * @return weight
-	 * @author Nikola
 	 */
 	public double getWeight() {
 		return weight;
@@ -42,17 +62,27 @@ public class Connection {
 
 	/**
 	 * Metoda za postavljanje tezine konekcije nad kojom se zove
-	 * @param weight
-	 * @author Nikola
+	 *
+	 * @param weight nova tezina konekcije
 	 */
-	public void setWeight(double w) {
-		weight = w;
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 
+	/**
+	 * Vraća lijevi neuron veze
+	 *
+	 * @return {@link Neuron}
+	 */
 	public Neuron getLeft() {
 		return left;
 	}
 
+	/**
+	 * Vraća desni neuron veze
+	 *
+	 * @return {@link Neuron}
+	 */
 	public Neuron getRight() {
 		return right;
 	}
