@@ -110,8 +110,12 @@ public class Neuron {
 	 *
 	 * @param input
 	 */
-	public void setInput(double input){
+	public void setInput(double input) {
 		this.input = input;
+	}
+	
+	public void setBias(double bias) {
+		this.bias = bias;
 	}
 
 	/**
