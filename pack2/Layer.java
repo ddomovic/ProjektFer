@@ -22,13 +22,20 @@ public class Layer implements Iterable<Neuron> {
 	 * @param numberOfNeurons broj neurona u layeru
 	 * @param tfunction transferna funkcija neurona
 	 */
-	public Layer(int numberOfNeurons, ITransferFunction tfunction){
+	public Layer(int numberOfNeurons, ITransferFunction tfunction, double minBias, double maxBias){
 		this.neuronList = new ArrayList<>();
 		for (int i= 0; i < numberOfNeurons; i++) {
-			neuronList.add(new Neuron(tfunction));
+			neuronList.add(new Neuron(tfunction, minBias, maxBias));
 		}
 	}
-
+	
+	public Layer(int numberOfNeurons, ITransferFunction tfunction, double bias){
+		this.neuronList = new ArrayList<>();
+		for (int i= 0; i < numberOfNeurons; i++) {
+			neuronList.add(new Neuron(tfunction, bias));
+		}
+	}
+	
 	/**
 	 * Stvara layer od danih neurona.
 	 *
@@ -55,10 +62,10 @@ public class Layer implements Iterable<Neuron> {
 	 *
 	 * @param rightLayer desni layer s kojim se spaja
 	 */
-	public void connect(Layer rightLayer) {
+	public void connect(Layer rightLayer, double min, double max) {
 		neuronList.forEach(left -> {
 			rightLayer.forEach(right -> {
-				Connection con = new Connection(left, right);
+				Connection con = new Connection(left, right, min, max);
 			});
 		});
 	}

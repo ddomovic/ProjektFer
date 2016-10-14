@@ -34,10 +34,10 @@ public class Connection {
 	 * @param left lijevi neuron
 	 * @param right desni neuron
 	 */
-	public Connection(Neuron left, Neuron right){
+	public Connection(Neuron left, Neuron right, double minWeight, double maxWeight){
 		this.left = left;
 		this.right = right;
-		this.weight = Math.random() * 2 - 1;
+		this.weight = Math.random() * (maxWeight - minWeight) + minWeight;
 		this.id = COUNTER++;
 		right.addInConnection(this);
 	}

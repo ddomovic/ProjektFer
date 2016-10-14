@@ -13,13 +13,9 @@ public class NeuralNetwork {
 	 * Lista {@link Layer}-a u mreži
 	 */
 	private ArrayList<Layer> layerList;
-	/**
-	 * {@link ITransferFunction} kojom se izračunava izlaz neurona
-	 */
-	private ITransferFunction tfunction;
 
 	/**
-	 * Inicijalizira neuronsku mrežu s danom transfernom funkcijom.
+	 * Inicijalizira neuronsku mrežu s danom tranisfernom funkcijom.
 	 * <br> Note: layeri se moraju ručno namjestiti pozivom funkcije {@link #addLayer(int)}
 	 *
 	 * @param tfunction transferna funkcija
@@ -28,18 +24,15 @@ public class NeuralNetwork {
 		this.layerList = new ArrayList<>();
 	}
 
-	/**
-	 * Dodaje novi layer zadane veličnine neuronskoj mreži.
-	 * <br> Layer se automatski spoji sa posljednjim u mreži ako takav postoji.
-	 *
-	 * @param numberOfNeurons velicina novog layera
-	 */
-	public void addLayer(int numberOfNeurons, ITransferFunction tfunction) {
-		Layer layer = new Layer(numberOfNeurons, tfunction);
+	public void addLayer(Layer layer) {
+		this.addLayer(layer, 0, 1);
+	}
+	
+	public void addLayer(Layer layer, double min, double max) {
 		//ako nije prvi layer onda ga spoji sa skroz desnim(zadnjim) layerom
 		if (!layerList.isEmpty()) {
 			Layer lastLayer = layerList.get(layerList.size() - 1);
-			lastLayer.connect(layer);
+			lastLayer.connect(layer, min, max);
 		}
 		layerList.add(layer);
 	}
@@ -77,9 +70,9 @@ public class NeuralNetwork {
 		ITransferFunction tsigmoid = new SigmoidTransferFunction();
 		ITransferFunction tlinear = new LinearTransferFunction();
 		NeuralNetwork network = new NeuralNetwork();
-		network.addLayer(3, tsigmoid);
-		network.addLayer(4, tsigmoid);
-		network.addLayer(2, tlinear);
+		network.addLayer(new Layer(1, tsigmoid, 0));
+		network.addLayer(new Layer(1000, tsigmoid, 0), -3d, 3d);
+		network.addLayer(new Layer(1, tlinear, 0));
 
 		double[] input = {7.0,16.0,3.0};
 		double[] output = network.run(input);

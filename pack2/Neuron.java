@@ -1,6 +1,7 @@
 package pack2;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Random;
 
 /**
  * Predstavlja neuron.
@@ -42,17 +43,21 @@ public class Neuron {
 	 */
 	private double bias;
 
+	public Neuron(ITransferFunction tfunction, double bias) {
+		this.bias = bias;
+		this.id = COUNTER++;
+		this.tfunction = tfunction;
+	}
+	
 	/**
 	 * Stvori i inicijalizira novi neuron.
 	 *
 	 * @param tfunction transferna funkcija
 	 */
-	public Neuron(ITransferFunction tfunction){
-		this.bias = Math.random() * 2 - 1;
-		this.id = COUNTER++;
-		this.tfunction = tfunction;
+	public Neuron(ITransferFunction tfunction, double min, double max) {
+		this(tfunction, Math.random() * (max-min) + min);
 	}
-
+	
 	/**
 	 * Metoda koja izračunava izlaz neurona
 	 *
@@ -78,19 +83,6 @@ public class Neuron {
 	 */
 	public void reset(){
 		output = 0;
-	}
-
-	/**
-	 * Metoda za istovremeno dodavanje vise konekcija trenutnom neuronu
-	 *
-	 * @param inNeurons lista ulaznih neurona
-	 */
-	public void addInConnectionsS(ArrayList<Neuron> inNeurons) {
-		for (Neuron n : inNeurons) {
-			Connection con = new Connection(n, this);
-			Inconnections.add(con);
-			connectionLookup.put(n.id, con);
-		}
 	}
 
 	/**
