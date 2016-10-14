@@ -3,6 +3,7 @@ package pack2;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Predstavlja jedan layer u neronskoj mreži.

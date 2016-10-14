@@ -65,9 +65,9 @@ public class Neuron {
 	 *
 	 */
 	public double calculateOutput(){
-		if (output != 0) {
-			return output;
-		}
+//		if (output != 0) {
+//			return output;
+//		}
 
 		double sum = input;
 		for(Connection connection : Inconnections){

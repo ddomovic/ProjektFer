@@ -35,9 +35,13 @@ public class Connection {
 	 * @param right desni neuron
 	 */
 	public Connection(Neuron left, Neuron right, double minWeight, double maxWeight){
+		this(left, right, Math.random() * (maxWeight - minWeight) + minWeight);
+	}
+	
+	public Connection(Neuron left, Neuron right, double weight){
 		this.left = left;
 		this.right = right;
-		this.weight = Math.random() * (maxWeight - minWeight) + minWeight;
+		this.weight = weight;
 		this.id = COUNTER++;
 		right.addInConnection(this);
 	}

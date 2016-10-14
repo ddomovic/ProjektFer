@@ -1,6 +1,11 @@
 package pack2;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
+
+import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.apache.commons.math3.stat.regression.RegressionResults;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 /**
  * Predstavlja osnovnu strukturu neuronske mreže koja može raditi s proizvoljnim brojem
@@ -68,16 +73,59 @@ public class NeuralNetwork {
 	 */
 	public static void main(String[] args) {
 		ITransferFunction tsigmoid = new SigmoidTransferFunction();
-		ITransferFunction tlinear = new LinearTransferFunction();
 		NeuralNetwork network = new NeuralNetwork();
+		
+		int numberOfSamples = 10000;
+		int hiddenNeuronNum = 500;
+		
 		network.addLayer(new Layer(1, tsigmoid, 0));
-		network.addLayer(new Layer(1000, tsigmoid, 0), -3d, 3d);
-		network.addLayer(new Layer(1, tlinear, 0));
+		Layer hiddenLayer = new Layer(hiddenNeuronNum, tsigmoid, 0);
+		network.addLayer(hiddenLayer, -5d, 5d);
+		
+		double output[][] = new double[numberOfSamples][hiddenNeuronNum];
+		double desiredOutputs[] = new double[numberOfSamples];
+		for (int i = 0; i < numberOfSamples; i++) {
+			double num = Math.random() * 2 * Math.PI;
+			desiredOutputs[i] = Math.sin(num);
+			double in[] = {num};
 
-		double[] input = {7.0,16.0,3.0};
-		double[] output = network.run(input);
-		for(double out : output){
-			System.out.println(out);
+			output[i] = network.run(in);
+//			System.out.print(num + ", rez: ");
+//			for (double d : output[i]) {
+//				System.out.print(d + " ");
+//			}
+//			System.out.println();
+		}
+		
+		OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
+		regression.newSampleData(desiredOutputs, output);
+		double[] results = regression.estimateRegressionParameters();
+		for (double r : results) {
+			System.out.println(r);
+		}
+		
+		ITransferFunction tlinear = new LinearTransferFunction();
+		Layer outputLayer = new Layer(1, tlinear, 0);
+		network.addLayer(outputLayer, 0, 1);
+		
+		outputLayer.forEach(new Consumer<Neuron>() {
+			
+			int i = 0;
+			
+			@Override
+			public void accept(Neuron n) {
+				ArrayList<Connection> inConnections = n.getAllInConnections();
+				inConnections.forEach(c -> {
+					c.setWeight(results[i++]);
+				});
+			}
+		});
+		
+		double test[] = {2 * Math.PI};
+		double outTest[] = network.run(test);
+		System.out.print("Rezultat: sin(" + test[0] + ") = ");
+		for (double ot : outTest) {
+			System.out.println(ot);
 		}
 	}
 
