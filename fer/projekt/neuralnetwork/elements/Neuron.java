@@ -1,7 +1,8 @@
-package pack2;
+package fer.projekt.neuralnetwork.elements;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
+
+import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 
 /**
  * Predstavlja neuron.
@@ -43,6 +44,12 @@ public class Neuron {
 	 */
 	private double bias;
 
+	/**
+	 * Inicijalizira neuron s tocno zadanom vrijednoscu biasa i aktivacijskom funkcijom.
+	 * 
+	 * @param tfunction transferna funkcija
+	 * @param bias bias neurona
+	 */
 	public Neuron(ITransferFunction tfunction, double bias) {
 		this.bias = bias;
 		this.id = COUNTER++;
@@ -50,12 +57,15 @@ public class Neuron {
 	}
 	
 	/**
-	 * Stvori i inicijalizira novi neuron.
+	 * Stvori i inicijalizira novi neuron s postavljenom vrijednoscu biasa izmedu
+	 * vrijednosti {@code minBias} {@code maxBias}.
 	 *
 	 * @param tfunction transferna funkcija
+	 * @param minBias minimalna vrijednost biasa
+	 * @param maxBias maximalna vrijednost biasa
 	 */
-	public Neuron(ITransferFunction tfunction, double min, double max) {
-		this(tfunction, Math.random() * (max-min) + min);
+	public Neuron(ITransferFunction tfunction, double minBias, double maxBias) {
+		this(tfunction, Math.random() * (maxBias-minBias) + minBias);
 	}
 	
 	/**
@@ -86,25 +96,6 @@ public class Neuron {
 	}
 
 	/**
-	 * Metoda koja vraca konekciju neurona za dani index neurona
-	 *
-	 * @param neuronIndex index neurona za kojeg trazimo konekciju
-	 * @return Connection konekciju neurona
-	 */
-	public Connection getConnection(int neuronIndex) {
-		return connectionLookup.get(neuronIndex);
-	}
-
-	/**
-	 * Metoda za dodavanje konekcija trenutnom neuronu
-	 *
-	 * @param con nova ulazna konekcija
-	 */
-	public void addInConnection(Connection con) {
-		Inconnections.add(con);
-	}
-
-	/**
 	 * Postavlja input neurona.
 	 * <br> Ova metoda se treba koristit samo za postavlja neurona input layera.
 	 *
@@ -114,10 +105,34 @@ public class Neuron {
 		this.input = input;
 	}
 	
+	/**
+	 * Setter za bias.
+	 * 
+	 * @param bias novi bias
+	 */
 	public void setBias(double bias) {
 		this.bias = bias;
 	}
-
+	
+	/**
+	 * Metoda koja vraca konekciju neurona za dani index neurona
+	 *
+	 * @param neuronIndex index neurona za kojeg trazimo konekciju
+	 * @return Connection konekciju neurona
+	 */
+	public Connection getConnection(int neuronIndex) {
+		return connectionLookup.get(neuronIndex);
+	}
+	
+	/**
+	 * Metoda za dodavanje konekcija trenutnom neuronu
+	 *
+	 * @param con nova ulazna konekcija
+	 */
+	public void addInConnection(Connection con) {
+		Inconnections.add(con);
+	}
+	
 	/**
 	 * Vraća listu svih ulaznih konekcija.
 	 *

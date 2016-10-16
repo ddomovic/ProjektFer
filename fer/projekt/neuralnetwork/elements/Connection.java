@@ -1,4 +1,4 @@
-package pack2;
+package fer.projekt.neuralnetwork.elements;
 
 /**
  * Razred koji predstavlja jednu konekciju izmedu dva neurona
@@ -29,21 +29,30 @@ public class Connection {
 	private int id;
 
 	/**
-	 * Stvori i inicijalizira novu konekciju izmedu dva neurona.
+	 * Stvori i inicijalizira novu konekciju izmedu dva neurona. Tezine neurona se postavlja na
+	 * random vrijednost izmedu dviju predanih u argumentu.
 	 *
 	 * @param left lijevi neuron
 	 * @param right desni neuron
+	 * @param minWeight maximalna tezina konekcije
+	 * @param maxWeight minimalna tezina konekcije
 	 */
 	public Connection(Neuron left, Neuron right, double minWeight, double maxWeight){
 		this(left, right, Math.random() * (maxWeight - minWeight) + minWeight);
 	}
 	
+	/**
+	 * Stvori i inicijalizira konekciju izmedu dva neurona.
+	 * 
+	 * @param left lijevi neuron
+	 * @param right desni neuron
+	 * @param weight tezina neurona
+	 */
 	public Connection(Neuron left, Neuron right, double weight){
 		this.left = left;
 		this.right = right;
 		this.weight = weight;
 		this.id = COUNTER++;
-		right.addInConnection(this);
 	}
 
 	/**

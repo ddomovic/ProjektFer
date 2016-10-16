@@ -1,4 +1,4 @@
-package pack2;
+package fer.projekt.neuralnetwork.activationfunction;
 
 /**
  * Aktivacijska funkcija linear neurona.
