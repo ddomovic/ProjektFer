@@ -47,6 +47,16 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		public double calculate(double input) {
 			return Math.cos(input);
 		}
+
+		@Override
+		public double getDomainMin() {
+			return 0;
+		}
+
+		@Override
+		public double getDomainMax() {
+			return 2 * Math.PI;
+		}
 	};
 	
 	/**
@@ -74,7 +84,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		for (int i = 0; i < NUMBOF_SAMPLES; i++) {
 			//0.stupac mora biti = 1
 			x[i][0] = 1;
-			double rand = Math.random() * 2 * Math.PI;
+			double rand = LEARNING_FUNC.getDomainMin() + Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
 			y[i] = LEARNING_FUNC.calculate(rand);
 			double in[] = {rand};
 			//ostali stupci x matrice su outputi hidden neurona
@@ -135,7 +145,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		int total = 0;
 		System.out.println("\t\t  OCEKIVANO:  DOBIVENO:  POGREŠKA[%]");
 		for (int i = 0; i < brojTestova; i++, total++) {
-			double in = Math.random() * 2 * Math.PI;
+			double in = LEARNING_FUNC.getDomainMin() + Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
 			double correct = LEARNING_FUNC.calculate(in);
 			double out = network.run(in);
 			double percErr = Math.abs(out - correct) / Math.abs(correct) * 100;

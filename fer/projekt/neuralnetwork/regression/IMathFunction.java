@@ -19,5 +19,19 @@ public interface IMathFunction {
 	 * @return ime fje
 	 */
 	public String getFuncName();
+
+	/**
+	 * Vraća minimalnu mogucu vrijednost domene.
+	 * 
+	 * @return min
+	 */
+	public double getDomainMin();
+	
+	/**
+	 * Vraća maximalnu mogucu vrijednost domene.
+	 * 
+	 * @return max
+	 */
+	public double getDomainMax();
 	
 }
