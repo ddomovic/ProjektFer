@@ -20,19 +20,19 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj testnih primjera za linearnu regresiju.
 	 */
-	public static final int NUMBOF_SAMPLES = 200_000;
+	public static int NUMBOF_SAMPLES = 100_000;
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static final int NUMBOF_HID_NEURONS = 200;
+	public static int NUMBOF_HID_NEURONS = 400;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MIN_WEIGHTS_FIRST_LAYER = -10d;
+	public static double MIN_WEIGHTS_FIRST_LAYER = -10d;
 	/**
 	 * Maximalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MAX_WEIGHTS_FIRST_LAYER = 10d;
+	public static double MAX_WEIGHTS_FIRST_LAYER = 10d;
 	/**
 	 * Funkcija koju mreža uči.
 	 */
@@ -40,12 +40,12 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		
 		@Override
 		public String getFuncName() {
-			return "cos";
+			return "sin";
 		}
 		
 		@Override
 		public double calculate(double input) {
-			return Math.cos(input);
+			return Math.sin(input);
 		}
 
 		@Override
@@ -81,12 +81,14 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	public void setupNetwork() {
 		double x[][] = new double[NUMBOF_SAMPLES][NUMBOF_HID_NEURONS + 1];
 		double y[] = new double[NUMBOF_SAMPLES];
-		for (int i = 0; i < NUMBOF_SAMPLES; i++) {
+		
+		double testInput = LEARNING_FUNC.getDomainMin();
+		double step = (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin()) / NUMBOF_SAMPLES;
+		for (int i = 0; i < NUMBOF_SAMPLES; i++, testInput += step) {
 			//0.stupac mora biti = 1
 			x[i][0] = 1;
-			double rand = LEARNING_FUNC.getDomainMin() + Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
-			y[i] = LEARNING_FUNC.calculate(rand);
-			double in[] = {rand};
+			y[i] = LEARNING_FUNC.calculate(testInput);
+			double in[] = {testInput};
 			//ostali stupci x matrice su outputi hidden neurona
 			double[] result = this.run(in);
 			int j = 1;
@@ -132,6 +134,37 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	}
 	
 	/**
+	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak pogreške.
+	 * 
+	 * @param minInterval minimalni interval na kojemu se testira
+	 * @param maxInterval maximalni interval na kojemu se testira
+	 * @return postatk pogreške od očekivanog rezultata
+	 */
+	public double runTests(double minInterval, double maxInterval) {
+		int brojTestova = 100;
+		
+		double totalPercErr = 0;
+		int total = 0;
+		double testIn = minInterval;
+		double step = (maxInterval - minInterval) / brojTestova;
+		
+		System.out.println("\t\t\tOCEKIVANO: DOBIVENO:    POGREŠKA[%]");
+		for (int i = 0; i < brojTestova; i++, total++, testIn += step) {
+			double correct = LEARNING_FUNC.calculate(testIn);
+			double out = this.run(testIn);
+			double percErr = Math.abs(out - correct) / Math.abs(correct) * 100;
+			if (correct > 0.00001 ) {
+				totalPercErr += percErr;
+			}
+			System.out.printf("%4d. %s(%.5f)= %10.5f %11.5f \t %6.2f%% %n", i + 1, 
+					LEARNING_FUNC.getFuncName(), testIn, correct, out, percErr);
+		}
+		double avgPerc = totalPercErr / total;
+		System.out.printf("%nUkupna pogreška je: %.3f%% %n", avgPerc);
+		return avgPerc;
+	}
+	
+	/**
 	 * The magic happens here
 	 *
 	 * @param args parametri komandne linije
@@ -139,22 +172,8 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	public static void main(String[] args) {
 		LinearRegressionNetwork network = new LinearRegressionNetwork();
 		
-		int brojTestova = 1000;
-		
-		double totalPercErr = 0;
-		int total = 0;
-		System.out.println("\t\t  OCEKIVANO:  DOBIVENO:  POGREŠKA[%]");
-		for (int i = 0; i < brojTestova; i++, total++) {
-			double in = LEARNING_FUNC.getDomainMin() + Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
-			double correct = LEARNING_FUNC.calculate(in);
-			double out = network.run(in);
-			double percErr = Math.abs(out - correct) / Math.abs(correct) * 100;
-			if (percErr < 100) {
-				totalPercErr += percErr;
-			}
-			System.out.printf("%3d. %s(%.3f)= %7.3f %11.3f \t %6.3f %n", i + 1, LEARNING_FUNC.getFuncName(), in, correct, out, percErr);
-		}
-		System.out.printf("%nUkupna pogreška je: %.3f%% %n", totalPercErr / total);
+//		network.runTests(-Math.PI, Math.PI);
+		network.runTests(0, 2 * Math.PI);
 	}
 	
 }
