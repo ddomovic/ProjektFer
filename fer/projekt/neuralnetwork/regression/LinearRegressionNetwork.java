@@ -9,6 +9,7 @@ import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.SigmoidTransferFunction;
+import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
@@ -40,12 +41,15 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		
 		@Override
 		public String getFuncName() {
-			return "sin";
+			return "Wave";
 		}
 		
 		@Override
 		public double calculate(double input) {
-			return Math.sin(input);
+			
+			ITransferFunction f = new WaveTransferFunction("/home/dominik/interpolation_input.txt");
+			
+			return f.applyFunction(input);
 		}
 
 		@Override
@@ -64,10 +68,10 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork() {
 		super();
-		ITransferFunction sigmoid = new SigmoidTransferFunction();
-		this.addLayer(new Layer(1, sigmoid, 0));
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/dominik/interpolation_input.txt");
+		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(
-				new Layer(NUMBOF_HID_NEURONS, sigmoid, 0), 
+				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
 				MIN_WEIGHTS_FIRST_LAYER,
 				MAX_WEIGHTS_FIRST_LAYER);
 		this.setupNetwork();
