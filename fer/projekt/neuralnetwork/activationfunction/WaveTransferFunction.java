@@ -18,7 +18,7 @@ public class WaveTransferFunction implements ITransferFunction {
 	
 	public WaveTransferFunction(String path) {
 		
-		Path file = Paths.get("/home/dominik/interpolation_input.txt");
+		Path file = Paths.get(path);
 		double[] x;
 		double[] y;
 		
@@ -63,7 +63,9 @@ public class WaveTransferFunction implements ITransferFunction {
 	@Override
 	public double applyFunction(double z) {
 				
-		return this.psf.value(z + 1500);
+		return this.psf.value(Math.abs(z%245) + 1400)*10_000%2200-1100; 
+		//skaliranje ulaza nesto ne radi dobro, z%245+1400 na neku foru daje brojeve manje od 1400
+		//skaliranje izlaza na [-1,1]
 	}
 
 }

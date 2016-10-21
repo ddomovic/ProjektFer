@@ -25,7 +25,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 400;
+	public static int NUMBOF_HID_NEURONS = 200;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -41,15 +41,13 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		
 		@Override
 		public String getFuncName() {
-			return "Wave";
+			return "Sin";
 		}
 		
 		@Override
 		public double calculate(double input) {
 			
-			ITransferFunction f = new WaveTransferFunction("/home/dominik/interpolation_input.txt");
-			
-			return f.applyFunction(input);
+			return Math.sin(input);
 		}
 
 		@Override
@@ -59,7 +57,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 
 		@Override
 		public double getDomainMax() {
-			return 2 * Math.PI;
+			return 2*Math.PI;
 		}
 	};
 	
@@ -68,7 +66,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork() {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("/home/dominik/interpolation_input.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("d://ProjektFer//PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(
 				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
@@ -176,8 +174,8 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	public static void main(String[] args) {
 		LinearRegressionNetwork network = new LinearRegressionNetwork();
 		
-//		network.runTests(-Math.PI, Math.PI);
-		network.runTests(0, 2 * Math.PI);
+		//network.runTests(-Math.PI, Math.PI);
+		network.runTests(0, 2*Math.PI);
 	}
 	
 }

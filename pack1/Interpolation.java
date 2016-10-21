@@ -34,7 +34,7 @@ public class Interpolation {
 	
 	public static void main(String[] args) {
 		
-		Path file = Paths.get("/home/dominik/interpolation_input.txt");
+		Path file = Paths.get("d://ProjektFer//PodaciZaAktivacijskuFunkciju.txt");
 		double[] x;
 		double[] y;
 		
