@@ -8,7 +8,6 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
-import fer.projekt.neuralnetwork.activationfunction.SigmoidTransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
@@ -21,11 +20,11 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj testnih primjera za linearnu regresiju.
 	 */
-	public static int NUMBOF_SAMPLES = 100_000;
+	public static int NUMBOF_SAMPLES = 10_000;
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 200;
+	public static int NUMBOF_HID_NEURONS = 1000;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -41,7 +40,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		
 		@Override
 		public String getFuncName() {
-			return "Sin";
+			return "sin";
 		}
 		
 		@Override
@@ -57,7 +56,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 
 		@Override
 		public double getDomainMax() {
-			return 2*Math.PI;
+			return 2 * Math.PI;
 		}
 	};
 	
@@ -66,7 +65,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork() {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("d://ProjektFer//PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/david/gitRepos/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(
 				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
@@ -137,32 +136,34 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	
 	/**
 	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak pogreške.
+	 * @param takeRandomTests označava da li su input testovi generirani random ili linearno na intervalu
 	 * 
-	 * @param minInterval minimalni interval na kojemu se testira
-	 * @param maxInterval maximalni interval na kojemu se testira
 	 * @return postatk pogreške od očekivanog rezultata
 	 */
-	public double runTests(double minInterval, double maxInterval) {
+	public double runTests(boolean takeRandomTests) {
 		int brojTestova = 100;
 		
 		double totalPercErr = 0;
 		int total = 0;
-		double testIn = minInterval;
-		double step = (maxInterval - minInterval) / brojTestova;
+		double testIn = LEARNING_FUNC.getDomainMin();
+		double step = (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin()) / brojTestova;
 		
 		System.out.println("\t\t\tOCEKIVANO: DOBIVENO:    POGREŠKA[%]");
 		for (int i = 0; i < brojTestova; i++, total++, testIn += step) {
+			if (takeRandomTests) {
+				testIn = Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
+			}
 			double correct = LEARNING_FUNC.calculate(testIn);
 			double out = this.run(testIn);
 			double percErr = Math.abs(out - correct) / Math.abs(correct) * 100;
 			if (correct > 0.00001 ) {
 				totalPercErr += percErr;
 			}
-			System.out.printf("%4d. %s(%.5f)= %10.5f %11.5f \t %6.2f%% %n", i + 1, 
+			System.out.printf("%4d. %s(%.5f)= \t%.10f \t%.10f \t %.3f%% %n", i + 1, 
 					LEARNING_FUNC.getFuncName(), testIn, correct, out, percErr);
 		}
 		double avgPerc = totalPercErr / total;
-		System.out.printf("%nUkupna pogreška je: %.3f%% %n", avgPerc);
+		System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
 		return avgPerc;
 	}
 	
@@ -173,9 +174,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public static void main(String[] args) {
 		LinearRegressionNetwork network = new LinearRegressionNetwork();
-		
-		//network.runTests(-Math.PI, Math.PI);
-		network.runTests(0, 2*Math.PI);
+		network.runTests(false);
 	}
 	
 }

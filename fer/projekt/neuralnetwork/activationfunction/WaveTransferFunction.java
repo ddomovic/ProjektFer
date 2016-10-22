@@ -9,13 +9,24 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+/**
+ * Aktivacijska funkcija koja interpolira funkciju opisanu datotekom s redcima kao parovima: "x y"
+ */
 public class WaveTransferFunction implements ITransferFunction {
 	
+	/**
+	 * Interpolirana funkcija
+	 */
 	private PolynomialSplineFunction psf;
 	
+	/**
+	 * Stvara novu funkciju koja se koristi za interpoliranje
+	 * 
+	 * @param path putanja do datoteke s podacima za interpoliranje
+	 */
 	public WaveTransferFunction(String path) {
 		
 		Path file = Paths.get(path);
@@ -48,7 +59,7 @@ public class WaveTransferFunction implements ITransferFunction {
 		    	
 		    }
 		    
-		    LinearInterpolator li = new LinearInterpolator();
+		    SplineInterpolator li = new SplineInterpolator();
 			this.psf = li.interpolate(x, y);
 		
 		}
@@ -62,8 +73,11 @@ public class WaveTransferFunction implements ITransferFunction {
 
 	@Override
 	public double applyFunction(double z) {
-				
-		return this.psf.value(Math.abs(z%245) + 1400)*10_000%2200-1100; 
+		double val = this.psf.value((z % 122.5) + 1522.5) * 100;
+//		double val = this.psf.value(Math.abs(z%245) + 1400)*10_000%2200-1100;
+//		System.out.println("Izlaz waveAktv. fje:" + val);
+		
+		return val;
 		//skaliranje ulaza nesto ne radi dobro, z%245+1400 na neku foru daje brojeve manje od 1400
 		//skaliranje izlaza na [-1,1]
 	}

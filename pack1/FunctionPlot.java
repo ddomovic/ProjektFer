@@ -7,7 +7,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 public class FunctionPlot extends JPanel {
 	
