@@ -81,7 +81,18 @@ public class NeuralNetwork {
 			output[i] = neuron.calculateOutput();
 			i++;
 		}
+		this.reset();
 		return output;
+	}
+	/**
+	 * Metoda koja služi za resetiranje mreže nakon 
+	 */
+	public void reset(){
+		for(Layer layer : layerList){
+			for(Neuron neuron : layer){
+				neuron.reset();
+			}
+		}
 	}
 
 }

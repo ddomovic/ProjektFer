@@ -24,7 +24,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 1000;
+	public static int NUMBOF_HID_NEURONS = 10;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -65,8 +65,9 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork() {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("/home/david/gitRepos/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("D:\\ProjektFer\\PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
+		this.addLayer(new Layer(100,wavefunction,1),-1,1);
 		this.addLayer(
 				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
 				MIN_WEIGHTS_FIRST_LAYER,
