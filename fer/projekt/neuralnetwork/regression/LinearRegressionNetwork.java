@@ -36,38 +36,21 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Funkcija koju mreža uči.
 	 */
-	public static final IMathFunction LEARNING_FUNC = new IMathFunction() {
-		
-		@Override
-		public String getFuncName() {
-			return "sin";
-		}
-		
-		@Override
-		public double calculate(double input) {
-			
-			return Math.sin(input);
-		}
+	public static final IMathFunction LEARNING_FUNC = new SinFunction();
+	
 
-		@Override
-		public double getDomainMin() {
-			return 0;
-		}
-
-		@Override
-		public double getDomainMax() {
-			return 2 * Math.PI;
-		}
-	};
+	public LinearRegressionNetwork(String nesto) {
+		super();
+	}
 	
 	/**
 	 * Inicijalizira novu mrezu za učenje neke matematičke funkcije.
 	 */
 	public LinearRegressionNetwork() {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("D:\\ProjektFer\\PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/david/gitRepos/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
-		this.addLayer(new Layer(100,wavefunction,1),-1,1);
+		this.addLayer(new Layer(10000,wavefunction,1),-1,1);
 		this.addLayer(
 				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
 				MIN_WEIGHTS_FIRST_LAYER,

@@ -13,11 +13,14 @@ import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
  */
 public class Layer implements Iterable<Neuron> {
 
+	public static int COUNTER = 1;
+	
+	private int index = COUNTER++;
 	/**
 	 * Lista {@link Neuron}-a koje layer sadrži
 	 */
 	private List<Neuron> neuronList;
-
+	
 	/**
 	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku 
 	 * funkciju i random bias izmedu vrijednosti {@code minBias} - {@code maxBias}.
@@ -34,6 +37,10 @@ public class Layer implements Iterable<Neuron> {
 		}
 	}
 	
+	public Neuron getNeuron(int index) {
+		return neuronList.get(index);
+	}
+	
 	/**
 	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku 
 	 * funkciju i tocno definiran bias.
@@ -44,6 +51,10 @@ public class Layer implements Iterable<Neuron> {
 	 */
 	public Layer(int numberOfNeurons, ITransferFunction tfunction, double bias){
 		this(numberOfNeurons, tfunction, bias, bias);
+	}
+	
+	public Layer() {
+		this.neuronList = new ArrayList<>();
 	}
 	
 	/**
@@ -57,7 +68,11 @@ public class Layer implements Iterable<Neuron> {
 			neuronList.add(n);
 		}
 	}
-
+	
+	public int getIndex() {
+		return index;
+	}
+	
 	/**
 	 * Vraća broj neurona u layeru.
 	 *
@@ -86,6 +101,32 @@ public class Layer implements Iterable<Neuron> {
 	@Override
 	public Iterator<Neuron> iterator() {
 		return neuronList.iterator();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + index;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Layer other = (Layer) obj;
+		if (index != other.index) {
+			return false;
+		}
+		return true;
 	}
 
 }

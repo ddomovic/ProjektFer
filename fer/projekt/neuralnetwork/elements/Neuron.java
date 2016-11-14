@@ -95,6 +95,14 @@ public class Neuron {
 		output = 0;
 	}
 
+	public int getId() {
+		return id;
+	}
+	
+	public double getBias() {
+		return bias;
+	}
+	
 	/**
 	 * Postavlja input neurona.
 	 * <br> Ova metoda se treba koristit samo za postavlja neurona input layera.
