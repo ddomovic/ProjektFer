@@ -25,7 +25,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 20;
+	public static int NUMBOF_HID_NEURONS = 10;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -37,7 +37,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Funkcija koju mreža uči.
 	 */
-	public static final IMathFunction LEARNING_FUNC = new SinFunction();
+	public static final IMathFunction LEARNING_FUNC = new ClassificationFunction();
 	
 
 	/**
@@ -45,7 +45,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork(String fileName) {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
@@ -125,10 +125,28 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	}
 	
 	/**
+	 *  Metoda koju koristimo kada želimo binarnu klasifikaciju
+	 * @param clas1 double vrijednost 1. klase
+	 * @param clas2 double vrijednost 2. klase
+	 * @param treshhold threshold ispod kojeg se zaokružuje na 1. klasu
+	 * @param input Ulaz funkcije čiji izlaz računamo
+	 * @return output kao vrijednost clas1 ili clas2
+	 */
+	public double run(double clas1, double clas2, double treshhold, double input  ){
+		double output = run(input);
+		if(output <= treshhold){
+			output = clas1;
+		}
+		else output = clas2;
+		return output;
+	}
+	
+	
+	/**
 	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak pogreške.
 	 * @param takeRandomTests označava da li su input testovi generirani random ili linearno na intervalu
 	 * 
-	 * @return postatk pogreške od očekivanog rezultata
+	 * @return postotak pogreške od očekivanog rezultata
 	 */
 	public double runTests(boolean takeRandomTests) {
 		int brojTestova = 100;
@@ -157,15 +175,49 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		return avgPerc;
 	}
 	
+	
+	/**
+	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak pogreške.
+	 * @param clas1
+	 * @param takeRandomTests označava da li su input testovi generirani random ili linearno na intervalu
+	 * 
+	 * @return postotak pogreške od očekivanog rezultata
+	 */
+	public double runTests(double clas1, double clas2, double treshhold, boolean takeRandomTests) {
+		int brojTestova = 100;
+		
+		double totalErrNumb = 0;
+		int total = 0;
+		double testIn = LEARNING_FUNC.getDomainMin();
+		double step = (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin()) / brojTestova;
+		
+		System.out.println("\t\t\t\t\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
+		for (int i = 0; i < brojTestova; i++, total++, testIn += step) {
+			if (takeRandomTests) {
+				testIn = Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
+			}
+			double correct = LEARNING_FUNC.calculate(testIn);
+			double out = this.run(clas1, clas2, treshhold,testIn);
+			if (correct != out ) {
+				totalErrNumb++;
+			}
+			System.out.printf("%4d. %s(%.5f)= \t%.10f \t%.10f \t %.5s %n", i + 1, 
+					LEARNING_FUNC.getFuncName(), testIn, correct, out, !(correct != out));
+		}
+		double avgPerc = totalErrNumb / total *100;
+		System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
+		return avgPerc;
+	}
 	/**
 	 * The magic happens here
 	 *
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-//		LinearRegressionNetwork network = new LinearRegressionNetwork(null);
-		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
+		LinearRegressionNetwork network = new LinearRegressionNetwork(null);
+//		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
 		network.runTests(false);
+		network.runTests(-1,1,0,false);
 	}
 	
 }

@@ -84,6 +84,8 @@ public class NeuralNetwork {
 		this.reset();
 		return output;
 	}
+	
+	
 	/**
 	 * Metoda koja služi za resetiranje mreže nakon 
 	 */
