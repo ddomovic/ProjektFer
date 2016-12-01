@@ -33,13 +33,15 @@ public class Layer implements Iterable<Neuron> {
 	public Layer(int numberOfNeurons, ITransferFunction tfunction, double minBias, double maxBias){
 		this.neuronList = new ArrayList<>();
 		for (int i= 0; i < numberOfNeurons; i++) {
-			neuronList.add(new Neuron(tfunction, minBias, maxBias));
+			Neuron n = new Neuron(tfunction, minBias, maxBias);
+			neuronList.add(n);
 		}
 	}
 	
 	public Neuron getNeuron(int index) {
 		return neuronList.get(index);
 	}
+	
 	
 	/**
 	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku 

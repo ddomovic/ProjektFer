@@ -141,6 +141,28 @@ public class Neuron {
 		Inconnections.add(con);
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + id;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Neuron other = (Neuron) obj;
+		if (id != other.id)
+			return false;
+		return true;
+	}
+
 	/**
 	 * Vraća listu svih ulaznih konekcija.
 	 *
@@ -149,4 +171,6 @@ public class Neuron {
 	public ArrayList<Connection> getAllInConnections() {
 		return Inconnections;
 	}
+	
+	
 }

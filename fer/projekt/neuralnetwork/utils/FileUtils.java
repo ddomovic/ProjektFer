@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.elements.Connection;
@@ -21,13 +22,18 @@ public class FileUtils {
 	private static String getLayerDescription(Layer layer) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("layerIndex=" + layer.getIndex() + System.lineSeparator());
-		layer.forEach(n -> {
-				sb.append("nid=" + n.getId() + " bias=" + n.getBias() + System.lineSeparator());
+		layer.forEach(new Consumer<Neuron>() {
+			int index = 0;
+
+			@Override
+			public void accept(Neuron n) {
+				sb.append("nindex=" + index++ + " bias=" + n.getBias() + System.lineSeparator());
 				List<Connection> connections = n.getAllInConnections();
 				connections.forEach(c -> {
-					sb.append("cid=" + c.getId() + " weight=" + c.getWeight() + System.lineSeparator());
-				});
-			});
+					sb.append("cindex=" + c.getId() + " weight=" + c.getWeight() + System.lineSeparator());
+				});				
+			}
+		});
 		return sb.toString();
 	}
 	
@@ -57,19 +63,19 @@ public class FileUtils {
 			String line = null;
 			while (br.ready() && (line = br.readLine()) != null) {
 				if (line.startsWith("layerIndex")) {
-					String index = line.substring(line.indexOf("=") + 1, line.indexOf(" "));
+					String index = line.substring(line.indexOf("=") + 1);
 					l = network.getLayerList().get(Integer.valueOf(index));
 				} else if (line.startsWith("nid")) {
 					String nid = line.substring(line.indexOf("=") + 1, line.indexOf(" "));
 					n = l.getNeuron(Integer.valueOf(nid));
 					
 					String bias = line.substring(line.indexOf("bias=") + 5);
-					n.setBias(Integer.valueOf(bias));
+					n.setBias(Double.valueOf(bias));
 				} else if (line.startsWith("cid")) {
 					ArrayList<Connection> inConnections = n.getAllInConnections();
 					
 					int cid = Integer.valueOf(line.substring(line.indexOf("=") + 1, line.indexOf(" ")));
-					String weight = line.substring(line.indexOf("weight=" + 7));
+					String weight = line.substring(line.indexOf("weight=") + 7);
 					inConnections.forEach(c -> {
 						if (c.getId() == cid) {
 							c.setWeight(Integer.valueOf(weight));

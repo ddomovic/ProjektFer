@@ -12,6 +12,7 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
+import fer.projekt.neuralnetwork.utils.FileUtils;
 
 /**
  * {@link NeuralNetwork} koji koristi linearnu regresiju za izračunavanje neke matematičke funkcije.
@@ -20,11 +21,11 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj testnih primjera za linearnu regresiju.
 	 */
-	public static int NUMBOF_SAMPLES = 10_000;
+	public static int NUMBOF_SAMPLES = 1_000;
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 10;
+	public static int NUMBOF_HID_NEURONS = 20;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -39,26 +40,31 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	public static final IMathFunction LEARNING_FUNC = new SinFunction();
 	
 
-	public LinearRegressionNetwork(String nesto) {
-		super();
-	}
-	
 	/**
 	 * Inicijalizira novu mrezu za učenje neke matematičke funkcije.
 	 */
-	public LinearRegressionNetwork() {
+	public LinearRegressionNetwork(String fileName) {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("/home/david/gitRepos/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+
 		this.addLayer(new Layer(1, wavefunction, 0));
-		this.addLayer(new Layer(10000,wavefunction,1),-1,1);
+		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(
 				new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), 
 				MIN_WEIGHTS_FIRST_LAYER,
 				MAX_WEIGHTS_FIRST_LAYER);
-		this.setupNetwork();
+		
+		if (fileName == null) {
+			this.setupNetwork();
+			FileUtils.saveNetwork(this, "LinearRegressionNetwork");
+		} else {
+			ITransferFunction tlinear = new LinearTransferFunction();
+			Layer outputLayer = new Layer(1, tlinear, 0);
+			this.addLayer(outputLayer, 0, 1);
+			FileUtils.loadNeuralNetwork(this, fileName);
+		}
 	}
 
-	
 	/**
 	 * Izračunava tezine konekcija neuronske mreže i postavlja ih na konekcije izmedu hidden 
 	 * i output layera. Koristi se linearna regresija.
@@ -157,7 +163,8 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		LinearRegressionNetwork network = new LinearRegressionNetwork();
+//		LinearRegressionNetwork network = new LinearRegressionNetwork(null);
+		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
 		network.runTests(false);
 	}
 	
