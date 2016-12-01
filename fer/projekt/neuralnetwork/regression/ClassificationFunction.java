@@ -13,7 +13,7 @@ public class ClassificationFunction implements IMathFunction {
 		if(input%3 <= 1){
 			return 1;
 		}
-		else return -1;
+		else return 0;
 	}
 
 	@Override

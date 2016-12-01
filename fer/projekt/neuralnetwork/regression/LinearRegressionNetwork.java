@@ -25,7 +25,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 10;
+	public static int NUMBOF_HID_NEURONS = 25;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -179,11 +179,13 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak pogreške.
 	 * @param clas1
+	 * @param clas2
+	 * @param treshhold
 	 * @param takeRandomTests označava da li su input testovi generirani random ili linearno na intervalu
-	 * 
+	 * @param print - želimo li isprintati rezultate
 	 * @return postotak pogreške od očekivanog rezultata
 	 */
-	public double runTests(double clas1, double clas2, double treshhold, boolean takeRandomTests) {
+	public double runTests(double clas1, double clas2, double treshhold, boolean takeRandomTests, boolean print) {
 		int brojTestova = 100;
 		
 		double totalErrNumb = 0;
@@ -191,7 +193,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		double testIn = LEARNING_FUNC.getDomainMin();
 		double step = (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin()) / brojTestova;
 		
-		System.out.println("\t\t\t\t\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
+		if(print) System.out.println("\t\t\t\t\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
 		for (int i = 0; i < brojTestova; i++, total++, testIn += step) {
 			if (takeRandomTests) {
 				testIn = Math.random() * (LEARNING_FUNC.getDomainMax() - LEARNING_FUNC.getDomainMin());
@@ -201,11 +203,11 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 			if (correct != out ) {
 				totalErrNumb++;
 			}
-			System.out.printf("%4d. %s(%.5f)= \t%.10f \t%.10f \t %.5s %n", i + 1, 
+			if(print) System.out.printf("%4d. %s(%.5f)= \t%.10f \t%.10f \t %.5s %n", i + 1, 
 					LEARNING_FUNC.getFuncName(), testIn, correct, out, !(correct != out));
 		}
 		double avgPerc = totalErrNumb / total *100;
-		System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
+		if(print) System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
 		return avgPerc;
 	}
 	/**
@@ -214,10 +216,29 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		LinearRegressionNetwork network = new LinearRegressionNetwork(null);
-//		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
-		network.runTests(false);
-		network.runTests(-1,1,0,false);
+		//LinearRegressionNetwork network = new LinearRegressionNetwork(null);
+		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
+//		network.runTests(false);
+
+		double bestThreshold = network.getBestThreshold(network,0,1);
+		System.out.println("najbolji threshold " + bestThreshold);
+		network.runTests(0,1,bestThreshold,false,true);
+	}
+
+	private double getBestThreshold(LinearRegressionNetwork network, double clas1 , double clas2) {
+		double treshholdpom;
+		double pom;
+		double best = network.runTests(clas1, clas2, clas1, false, false);
+		double treshhold = clas1;
+		for(treshholdpom = clas1; treshholdpom <= clas2; treshholdpom += 0.01){
+			pom = network.runTests(clas1,clas2,treshholdpom,false,false);
+			if(pom < best){
+				treshhold = treshholdpom;
+				best = pom;
+			}
+			
+		}
+		return treshhold;
 	}
 	
 }
