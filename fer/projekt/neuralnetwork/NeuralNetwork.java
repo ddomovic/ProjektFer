@@ -94,5 +94,9 @@ public class NeuralNetwork {
 			}
 		}
 	}
+	
+	public ArrayList<Layer> getLayerList() {
+		return layerList;
+	}
 
 }
