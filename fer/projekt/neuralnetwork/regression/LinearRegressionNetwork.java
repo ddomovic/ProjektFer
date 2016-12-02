@@ -45,8 +45,8 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 */
 	public LinearRegressionNetwork(String fileName) {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-
+//		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(
@@ -216,7 +216,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		//LinearRegressionNetwork network = new LinearRegressionNetwork(null);
+//		LinearRegressionNetwork network = new LinearRegressionNetwork(null);
 		LinearRegressionNetwork network = new LinearRegressionNetwork("LinearRegressionNetwork");
 //		network.runTests(false);
 

@@ -74,7 +74,7 @@ public class FileUtils {
 		}
 	}
 	
-	public static void loadNeuralNetwork(LinearRegressionNetwork network, String fileName) {
+	public static void loadNeuralNetwork(NeuralNetwork network, String fileName) {
 		Path p = Paths.get(fileName);
 		Layer l = null;
 		Neuron n = null;
