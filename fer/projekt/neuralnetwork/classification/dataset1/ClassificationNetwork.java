@@ -41,9 +41,9 @@ public class ClassificationNetwork extends NeuralNetwork {
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
 		// ITransferFunction wavefunction = new
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction(
-		//		"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		// WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction(
+				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(6, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -202,7 +202,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 		//		double bestThreshold = network.getBestThreshold(network, 0, 1);
 		//		System.out.println("najbolji threshold " + bestThreshold);
-		network.runTests(0, 1, 0.51, true);
+		network.runTests(0, 1, 0.39, true);
 	}
 
 }
