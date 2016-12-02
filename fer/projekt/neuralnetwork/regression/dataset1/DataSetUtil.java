@@ -21,10 +21,11 @@ import java.util.function.Consumer;
 public class DataSetUtil {
 	private static List<Data> loadDataset(Path p) {
 		ArrayList<Data> dataset = new ArrayList<>();
-
+		int counter = 0;
 		try (BufferedReader br = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
 			String line = null;
-			while (br.ready() && (line = br.readLine()) != null) {
+			while (counter < 147 && br.ready() && (line = br.readLine()) != null) {
+				counter++;
 				String[] args = line.split(",");
 				int OSM_ID = Integer.parseInt(args[0]);
 				double longitude = Double.parseDouble(args[1]);

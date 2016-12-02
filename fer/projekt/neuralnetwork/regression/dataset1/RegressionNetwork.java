@@ -28,7 +28,7 @@ public class RegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 30;
+	public static int NUMBOF_HID_NEURONS = 25;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -51,7 +51,7 @@ public class RegressionNetwork extends NeuralNetwork {
 		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		//ITransferFunction wavefunction = new WaveTransferFunction(
 		//		"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		this.addLayer(new Layer(3, wavefunction, 0));
+		this.addLayer(new Layer(2, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
 
@@ -85,7 +85,7 @@ public class RegressionNetwork extends NeuralNetwork {
 			// 0.stupac mora biti = 1
 			x[i][0] = 1;
 			y[i] = testInput.getAltitude();
-			double in[] = { testInput.getOSM_ID(), testInput.getLongitude(),testInput.getLatitude()};
+			double in[] = {testInput.getLongitude(),testInput.getLatitude()};
 			// ostali stupci x matrice su outputi hidden neurona
 			double[] result = this.run(in);
 			int j = 1;
@@ -133,10 +133,10 @@ public class RegressionNetwork extends NeuralNetwork {
 	public double runTests(boolean print) {
 		double totalPercErr = 0;
 
-		System.out.println("\t\t\t\t\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
+		System.out.println("   OCEKIVANO:\t\t DOBIVENO:\tgreska:");
 		for (int i = 0; i < testingDatasetSize; i++) {
 			Data testInput = testingDataset.get(i);
-			double in[] = { testInput.getOSM_ID(), testInput.getLongitude(),testInput.getLatitude()};
+			double in[] = { testInput.getLongitude(),testInput.getLatitude()};
 
 			double correct = testInput.getAltitude();
 			double out = this.run(in)[0];
@@ -144,7 +144,7 @@ public class RegressionNetwork extends NeuralNetwork {
 			if (correct > 0.00001) {
 				totalPercErr += percErr;
 			}
-			System.out.printf("%4d. %s(%.5f)= \t%.10f \t%.10f \t %.3f%% %n", i + 1,
+			System.out.printf("%4d. %.5f \t	%.5f = \t%.10f%%%n", i + 1,
 					correct, out, percErr);
 		}
 		double avgPerc = totalPercErr / testingDatasetSize;
@@ -160,8 +160,8 @@ public class RegressionNetwork extends NeuralNetwork {
 	 *            parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		RegressionNetwork network = new RegressionNetwork(null, Paths.get("3D_spatial_network.txt"));
-		//		RegressionNetwork network = new RegressionNetwork(Paths.get("RegressionNetwork"),Paths.get("3D_spatial_network.txt"));
+		//RegressionNetwork network = new RegressionNetwork(null, Paths.get("3D_spatial_network.txt"));
+		RegressionNetwork network = new RegressionNetwork(Paths.get("RegressionNetwork"),Paths.get("3D_spatial_network.txt"));
 
 		network.runTests(true);
 	}
