@@ -22,6 +22,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * Broj neurona u hidden layeru.
 	 */
 	public static int NUMBOF_HID_NEURONS = 30;
+	public static int NUMBOF_OUTPUT = 2;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -40,10 +41,9 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		// ITransferFunction wavefunction = new
-		// WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		ITransferFunction wavefunction = new WaveTransferFunction(
-				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		// ITransferFunction wavefunction = new WaveTransferFunction(
+		// "C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(6, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -71,15 +71,16 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 */
 	public void setupNetwork() {
 		double x[][] = new double[learningDatasetSize][NUMBOF_HID_NEURONS + 1];
-		double y[] = new double[learningDatasetSize];
+		double y[][] = new double[learningDatasetSize][NUMBOF_OUTPUT];
 
 		Data testInput = learningDataset.get(0);
 		for (int i = 0; i < learningDatasetSize - 1; i++, testInput = learningDataset.get(i)) {
 			// 0.stupac mora biti = 1
 			x[i][0] = 1;
-			y[i] = testInput.getInflammation();
-			double in[] = {testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
-					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn()};
+			y[i][0] = testInput.getInflammation();
+			y[i][1] = testInput.getNephritis();
+			double in[] = { testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
+					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn() };
 			// ostali stupci x matrice su outputi hidden neurona
 			double[] result = this.run(in);
 			int j = 1;
@@ -90,27 +91,42 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 		OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
 		regression.setNoIntercept(true);
-		regression.newSampleData(y, x);
+		regression.newSampleData(y[0], x);
 		double[] weights = regression.estimateRegressionParameters();
+		regression.setNoIntercept(true);
+		regression.newSampleData(y[1], x);
+		double[] weights2 = regression.estimateRegressionParameters();
 
 		// dodat jos zadnji layer(neuron)
 		ITransferFunction tlinear = new LinearTransferFunction();
-		Layer outputLayer = new Layer(1, tlinear, 0);
+		Layer outputLayer = new Layer(2, tlinear, 0);
 		this.addLayer(outputLayer, 0, 1); // ovdje je tezina konekcija nebitna
 		// jer ju ionako namjestamo
-		outputLayer.forEach(new Consumer<Neuron>() {
 
+		Neuron n = outputLayer.getNeuron(0);
+		ArrayList<Connection> inConnections = n.getAllInConnections();
+		inConnections.forEach(new Consumer<Connection>() {
 			int i = 1;
 
 			@Override
-			public void accept(Neuron n) {
-				ArrayList<Connection> inConnections = n.getAllInConnections();
-				inConnections.forEach(c -> {
-					c.setWeight(weights[i++]);
-				});
-				n.setBias(weights[0]);
+			public void accept(Connection c) {
+				c.setWeight(weights[i++]);
 			}
 		});
+		n.setBias(weights[0]);
+
+		n = outputLayer.getNeuron(1);
+		inConnections = n.getAllInConnections();
+		inConnections.forEach(new Consumer<Connection>() {
+			int i = 1;
+
+			@Override
+			public void accept(Connection c) {
+				c.setWeight(weights2[i++]);
+			}
+		});
+		n.setBias(weights2[0]);
+
 	}
 
 	/**
@@ -126,7 +142,8 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 *            Ulaz funkcije čiji izlaz računamo
 	 * @return output kao vrijednost clas1 ili clas2
 	 */
-	public double run(double clas1, double clas2, double treshhold, double []input) {
+	public double run(double clas1, double clas2, double treshhold, double[] input) {
+
 		double[] output = run(input);
 		if (output[0] <= treshhold) {
 			output[0] = clas1;
@@ -150,12 +167,12 @@ public class ClassificationNetwork extends NeuralNetwork {
 		double totalErrNumb = 0;
 
 		if (print) {
-			System.out.println("\t\t\t\t\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
+			System.out.println("\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
 		}
 		for (int i = 0; i < testingDatasetSize; i++) {
 			Data testInput = testingDataset.get(i);
-			double testIn[] = {testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
-					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn()};
+			double testIn[] = { testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
+					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn() };
 
 			double correct = testInput.getInflammation();
 			double out = this.run(clas1, clas2, treshhold, testIn);
@@ -197,12 +214,14 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 *            parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		//		ClassificationNetwork network = new ClassificationNetwork(null, Paths.get("diagnosis.txt"));
-		ClassificationNetwork network = new ClassificationNetwork(Paths.get("ClassificationNetwork"), Paths.get("diagnosis.txt"));
+		ClassificationNetwork network = new ClassificationNetwork(null, Paths.get("diagnosis.txt"));
+		// ClassificationNetwork network = new
+		// ClassificationNetwork(Paths.get("ClassificationNetwork"),
+		// Paths.get("diagnosis.txt"));
 
-		//		double bestThreshold = network.getBestThreshold(network, 0, 1);
-		//		System.out.println("najbolji threshold " + bestThreshold);
-		network.runTests(0, 1, 0.39, true);
+		double bestThreshold = network.getBestThreshold(network, 0, 1);
+		System.out.println("najbolji threshold " + bestThreshold);
+		network.runTests(0, 1, bestThreshold, true);
 	}
 
 }
