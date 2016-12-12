@@ -48,7 +48,8 @@ public class RegressionNetwork extends NeuralNetwork {
 	public RegressionNetwork(Path networkSetup, Path datasetPath) {
 		super();
 		// ITransferFunction wavefunction = new
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		//ITransferFunction wavefunction = new WaveTransferFunction(
 		//		"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(2, wavefunction, 0));
