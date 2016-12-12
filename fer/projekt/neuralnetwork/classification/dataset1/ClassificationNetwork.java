@@ -3,6 +3,7 @@ package fer.projekt.neuralnetwork.classification.dataset1;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -41,10 +42,10 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		//ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		// ITransferFunction wavefunction = new WaveTransferFunction(
-		// "C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction(
+				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(6, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -92,10 +93,21 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 		OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
 		regression.setNoIntercept(true);
-		regression.newSampleData(y[0], x);
+		double[] aux = new double[learningDatasetSize];
+		for (int j = 0; j < learningDatasetSize; j++) {
+
+			aux[j] = y[j][0];
+
+		}
+		regression.newSampleData(aux, x);
 		double[] weights = regression.estimateRegressionParameters();
 		regression.setNoIntercept(true);
-		regression.newSampleData(y[1], x);
+		for (int j = 0; j < learningDatasetSize; j++) {
+
+			aux[j] = y[j][1];
+
+		}
+		regression.newSampleData(aux, x);
 		double[] weights2 = regression.estimateRegressionParameters();
 
 		// dodat jos zadnji layer(neuron)
@@ -143,15 +155,17 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 *            Ulaz funkcije čiji izlaz računamo
 	 * @return output kao vrijednost clas1 ili clas2
 	 */
-	public double run(double clas1, double clas2, double treshhold, double[] input) {
-
+	public double[] runAndClassify(ClassificationOutput[] cOutputs, double[] input) {
 		double[] output = run(input);
-		if (output[0] <= treshhold) {
-			output[0] = clas1;
-		} else {
-			output[0] = clas2;
+		for (int i = 0; i < cOutputs.length; i++) {
+			ClassificationOutput cOut = cOutputs[i];
+			if (output[i] <= cOut.getThreshold()) {
+				output[i] = cOut.getClas1();
+			} else {
+				output[i] = cOut.getClas2();
+			}
 		}
-		return output[0];
+		return output;
 	}
 
 	/**
@@ -164,10 +178,10 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 *
 	 * @return postotak pogreške od očekivanog rezultata
 	 */
-	public double runTests(double clas1, double clas2, double treshhold, boolean print) {
-		double totalErrNumb = 0;
+	public double test(ClassificationOutput[] cOutputs, boolean doPrint) {
+		double totalErrCounter = 0;
 
-		if (print) {
+		if (doPrint) {
 			System.out.println("\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
 		}
 		for (int i = 0; i < testingDatasetSize; i++) {
@@ -175,37 +189,58 @@ public class ClassificationNetwork extends NeuralNetwork {
 			double testIn[] = { testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
 					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn() };
 
-			double correct = testInput.getInflammation();
-			double out = this.run(clas1, clas2, treshhold, testIn);
-			if (correct != out) {
-				totalErrNumb++;
+			double[] correct = {testInput.getInflammation(), testInput.getNephritis()};
+			double[] out = this.runAndClassify(cOutputs, testIn);
+			boolean isti = Arrays.equals(correct, out);
+			if (!isti) {
+				totalErrCounter++;
 			}
-			if (print) {
-				System.out.printf("%4d. \t%.10f \t%.10f \t %.5s %n", i + 1, correct, out, correct == out);
+			if (doPrint) {
+
+				System.out.printf("%4d. \t%.1f, %.1f \t%.1f, %.1f \t %.5s %n", i + 1, correct[0], correct[1], out[0], out[1], isti);
 			}
 		}
 
-		double avgPerc = totalErrNumb / testingDatasetSize * 100;
-		if (print) {
+		double avgPerc = totalErrCounter / testingDatasetSize * 100;
+		if (doPrint) {
 			System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
 		}
 		return avgPerc;
 	}
 
-	private double getBestThreshold(ClassificationNetwork network, double clas1, double clas2) {
-		double treshholdpom;
-		double pom;
-		double best = network.runTests(clas1, clas2, clas1, false);
-		double treshhold = clas1;
-		for (treshholdpom = clas1; treshholdpom <= clas2; treshholdpom += 0.01) {
-			pom = network.runTests(clas1, clas2, treshholdpom, false);
-			if (pom < best) {
-				treshhold = treshholdpom;
-				best = pom;
-			}
-
+	private double[] getBestThreshold(ClassificationNetwork network, ClassificationOutput[] cOutputs) {
+		int brojStepova = 100;
+		double[] steps = new double[NUMBOF_OUTPUT];
+		for (int i = 0; i < cOutputs.length; i++) {
+			steps[i] = (cOutputs[i].getClas2() - cOutputs[i].getClas1()) / brojStepova;
 		}
-		return treshhold;
+
+		double[] bestThresholds = new double[NUMBOF_OUTPUT];
+		Arrays.fill(bestThresholds, 0);
+
+		double perc;
+		double bestPerc = 100;
+		for (int i = 0; i < brojStepova; i++) {
+			perc = network.test(cOutputs, false);
+			if (perc < bestPerc) {
+				bestPerc = perc;
+				int j = 0;
+				for (ClassificationOutput cO : cOutputs) {
+					bestThresholds[j++] = cO.getThreshold();
+				}
+			}
+			//povecaj threshold za step
+			int z = 0;
+			for (ClassificationOutput cO : cOutputs) {
+				cO.setThreshold(cO.getThreshold() + steps[z++]);
+			}
+		}
+		int i = 0;
+		for (ClassificationOutput cO : cOutputs) {
+			cO.setThreshold(bestThresholds[i++]);
+		}
+
+		return bestThresholds;
 	}
 
 	/**
@@ -220,9 +255,12 @@ public class ClassificationNetwork extends NeuralNetwork {
 		// ClassificationNetwork(Paths.get("ClassificationNetwork"),
 		// Paths.get("diagnosis.txt"));
 
-		double bestThreshold = network.getBestThreshold(network, 0, 1);
-		System.out.println("najbolji threshold " + bestThreshold);
-		network.runTests(0, 1, bestThreshold, true);
+		ClassificationOutput[] cOutputs = new ClassificationOutput[NUMBOF_OUTPUT];
+		for (int i = 0; i < NUMBOF_OUTPUT; i++) {
+			cOutputs[i] = new ClassificationOutput(0, 1);
+		}
+		double[] bestThresholds = network.getBestThreshold(network, cOutputs);
+		network.test(cOutputs, true);
 	}
 
 }

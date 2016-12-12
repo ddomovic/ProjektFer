@@ -7,18 +7,18 @@ public class ClassificationOutput {
 
 	private int clas1;
 	private int clas2;
-	private int threshold;
+	private double threshold;
 
 	/**
 	 * @param clas1
 	 * @param clas2
 	 * @param bestThreshold
 	 */
-	public ClassificationOutput(int clas1, int clas2, int bestThreshold) {
+	public ClassificationOutput(int clas1, int clas2) {
 		super();
 		this.clas1 = clas1;
 		this.clas2 = clas2;
-		this.threshold = bestThreshold;
+		this.threshold = clas1;
 	}
 
 	public int getClas1() {
@@ -37,11 +37,11 @@ public class ClassificationOutput {
 		this.clas2 = clas2;
 	}
 
-	public int getThreshold() {
+	public double getThreshold() {
 		return threshold;
 	}
 
-	public void setThreshold(int threshold) {
+	public void setThreshold(double threshold) {
 		this.threshold = threshold;
 	}
 
