@@ -41,7 +41,8 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		// ITransferFunction wavefunction = new WaveTransferFunction(
 		// "C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(6, wavefunction, 0));

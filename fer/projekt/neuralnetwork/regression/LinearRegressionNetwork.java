@@ -49,8 +49,9 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		super();
 		// ITransferFunction wavefunction = new
 		// WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		ITransferFunction wavefunction = new WaveTransferFunction(
-				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//ITransferFunction wavefunction = new WaveTransferFunction(
+				//"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
