@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
+import fer.projekt.neuralnetwork.FileUtils;
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
@@ -18,7 +19,6 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
-import fer.projekt.neuralnetwork.utils.FileUtils;
 
 /**
  * @author Nikola
@@ -47,11 +47,7 @@ public class RegressionNetwork extends NeuralNetwork {
 
 	public RegressionNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		// ITransferFunction wavefunction = new
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction(
-		//		"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(6, wavefunction, 0));
 		//	this.addLayer(new Layer(3, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);

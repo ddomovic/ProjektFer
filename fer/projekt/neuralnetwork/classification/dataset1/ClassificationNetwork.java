@@ -37,11 +37,11 @@ public class ClassificationNetwork extends NeuralNetwork {
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MIN_WEIGHTS_FIRST_LAYER = -10d;
+	public static final double MIN_WEIGHTS_FIRST_LAYER = -5d;
 	/**
 	 * Maximalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MAX_WEIGHTS_FIRST_LAYER = 10d;
+	public static final double MAX_WEIGHTS_FIRST_LAYER = 5d;
 	/**
 	 * Brojnik koji zajedno s denumeratorom označava postotak podjele testova za učenje i testiranje.
 	 */
@@ -53,7 +53,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 	/**
 	 * Ime pod kojim se network sprema u direktorij projekta.
 	 */
-	public static final String NETWORK_NAME = "ClassificationNetwork";
+	public static final String NETWORK_NAME = "Classification-Inflamation";
 
 	private int learningDatasetSize;
 	private List<Data> learningDataset;
@@ -71,9 +71,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 */
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		//ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		ITransferFunction wavefunction = new WaveTransferFunction("C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("PodaciZaAktivacijskuFunkciju.txt");
 		cOutputs = new ClassificationOutput[NUMBOF_OUTPUT];
 		for (int i = 0; i < NUMBOF_OUTPUT; i++) {
 			cOutputs[i] = new ClassificationOutput(0, 1);
@@ -329,13 +327,13 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		final boolean radiNovuMrezu = false;
+		final boolean radiNovuMrezu = true;
 
 		ClassificationNetwork network = null;
 		if (radiNovuMrezu) {
-			network = new ClassificationNetwork(null, Paths.get("diagnosis.txt"));
+			network = new ClassificationNetwork(null, Paths.get("classificationDataset1.txt"));
 		} else {
-			network = new ClassificationNetwork(Paths.get(NETWORK_NAME), Paths.get("diagnosis.txt"));
+			network = new ClassificationNetwork(Paths.get(NETWORK_NAME), Paths.get("classificationDataset1.txt"));
 		}
 		for (double d : network.getBestThresholds()) {
 			System.out.println(d);
