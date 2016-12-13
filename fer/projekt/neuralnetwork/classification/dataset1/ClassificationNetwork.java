@@ -19,7 +19,12 @@ import fer.projekt.neuralnetwork.elements.Neuron;
 
 /**
  * Razred koji predstavlja neuronsku mrežu koja služi za klasifikaciju.
+ *
+ * <p> Dataset koji ima 6 inputa i koristi se za izračun mogućih bolesti(upala).
+ * <br> {@linkplain https://archive.ics.uci.edu/ml/datasets/Acute+Inflammations}
+ *
  */
+@SuppressWarnings("javadoc")
 public class ClassificationNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.

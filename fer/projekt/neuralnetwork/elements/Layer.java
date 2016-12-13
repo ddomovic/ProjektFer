@@ -13,16 +13,19 @@ import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
  */
 public class Layer implements Iterable<Neuron> {
 
+	/**
+	 * Layer counter.
+	 */
 	public static int COUNTER = 1;
-	
+
 	private int index = COUNTER++;
 	/**
 	 * Lista {@link Neuron}-a koje layer sadrži
 	 */
 	private List<Neuron> neuronList;
-	
+
 	/**
-	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku 
+	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku
 	 * funkciju i random bias izmedu vrijednosti {@code minBias} - {@code maxBias}.
 	 *
 	 * @param numberOfNeurons broj neurona u layeru
@@ -37,16 +40,22 @@ public class Layer implements Iterable<Neuron> {
 			neuronList.add(n);
 		}
 	}
-	
+
+	/**
+	 * Vraća Neuron s danim indexom iz layera.
+	 *
+	 * @param index index neurona u layeru
+	 * @return {@code Neuron} objekt
+	 */
 	public Neuron getNeuron(int index) {
 		return neuronList.get(index);
 	}
-	
-	
+
+
 	/**
-	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku 
+	 * Inicijalizira layer s zadanim brojem neurona. Svakom od neurona daje istu aktivacijsku
 	 * funkciju i tocno definiran bias.
-	 * 
+	 *
 	 * @param numberOfNeurons broj neurona u layeru
 	 * @param tfunction transferna funkcija neurona
 	 * @param bias vrijednost biasa za svaki neuron u layeru
@@ -54,11 +63,14 @@ public class Layer implements Iterable<Neuron> {
 	public Layer(int numberOfNeurons, ITransferFunction tfunction, double bias){
 		this(numberOfNeurons, tfunction, bias, bias);
 	}
-	
+
+	/**
+	 * Default constructor koji radi novi layer s 0 neurona.
+	 */
 	public Layer() {
 		this.neuronList = new ArrayList<>();
 	}
-	
+
 	/**
 	 * Stvara layer od danih neurona.
 	 *
@@ -70,11 +82,16 @@ public class Layer implements Iterable<Neuron> {
 			neuronList.add(n);
 		}
 	}
-	
+
+	/**
+	 * Vraća index layera.
+	 *
+	 * @return index
+	 */
 	public int getIndex() {
 		return index;
 	}
-	
+
 	/**
 	 * Vraća broj neurona u layeru.
 	 *

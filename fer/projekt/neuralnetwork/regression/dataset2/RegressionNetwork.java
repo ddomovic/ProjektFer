@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
+import fer.projekt.neuralnetwork.FileUtils;
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
@@ -18,7 +19,6 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
-import fer.projekt.neuralnetwork.utils.FileUtils;
 
 /**
  * @author Nikola
@@ -48,10 +48,10 @@ public class RegressionNetwork extends NeuralNetwork {
 	public RegressionNetwork(Path networkSetup, Path datasetPath) {
 		super();
 		// ITransferFunction wavefunction = new
-		ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//		ITransferFunction wavefunction = new WavTeTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		//ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction(
-		//		"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction(
+				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(4, wavefunction, 0));
 		//		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -159,6 +159,9 @@ public class RegressionNetwork extends NeuralNetwork {
 	 *
 	 * @param args
 	 *            parametri komandne linije
+	 */
+	/**
+	 * @param args
 	 */
 	public static void main(String[] args) {
 		RegressionNetwork network = new RegressionNetwork(null, Paths.get("servo.data"));

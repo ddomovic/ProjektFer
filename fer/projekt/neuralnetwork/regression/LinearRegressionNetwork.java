@@ -44,14 +44,16 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 
 	/**
 	 * Inicijalizira novu mrezu za učenje neke matematičke funkcije.
+	 *
+	 * @param fileName putanja do spremljene mreže, ako je null onda se sprema pod nazivom LinearRegressionNetwork
 	 */
 	public LinearRegressionNetwork(Path fileName) {
 		super();
 		// ITransferFunction wavefunction = new
 		// WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		//ITransferFunction wavefunction = new WaveTransferFunction(
-				//"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction(
+				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		this.addLayer(new Layer(1, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -99,7 +101,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 		ITransferFunction tlinear = new LinearTransferFunction();
 		Layer outputLayer = new Layer(1, tlinear, 0);
 		this.addLayer(outputLayer, 0, 1); // ovdje je tezina konekcija nebitna
-											// jer ju ionako namjestamo
+		// jer ju ionako namjestamo
 		outputLayer.forEach(new Consumer<Neuron>() {
 
 			int i = 1;

@@ -46,7 +46,7 @@ public class Neuron {
 
 	/**
 	 * Inicijalizira neuron s tocno zadanom vrijednoscu biasa i aktivacijskom funkcijom.
-	 * 
+	 *
 	 * @param tfunction transferna funkcija
 	 * @param bias bias neurona
 	 */
@@ -55,7 +55,7 @@ public class Neuron {
 		this.id = COUNTER++;
 		this.tfunction = tfunction;
 	}
-	
+
 	/**
 	 * Stvori i inicijalizira novi neuron s postavljenom vrijednoscu biasa izmedu
 	 * vrijednosti {@code minBias} {@code maxBias}.
@@ -67,7 +67,7 @@ public class Neuron {
 	public Neuron(ITransferFunction tfunction, double minBias, double maxBias) {
 		this(tfunction, Math.random() * (maxBias-minBias) + minBias);
 	}
-	
+
 	/**
 	 * Metoda koja izračunava izlaz neurona
 	 *
@@ -95,14 +95,24 @@ public class Neuron {
 		output = 0;
 	}
 
+	/**
+	 * Vraća id neurona
+	 *
+	 * @return id
+	 */
 	public int getId() {
 		return id;
 	}
-	
+
+	/**
+	 * Getter za bias
+	 *
+	 * @return bias
+	 */
 	public double getBias() {
 		return bias;
 	}
-	
+
 	/**
 	 * Postavlja input neurona.
 	 * <br> Ova metoda se treba koristit samo za postavlja neurona input layera.
@@ -112,16 +122,16 @@ public class Neuron {
 	public void setInput(double input) {
 		this.input = input;
 	}
-	
+
 	/**
 	 * Setter za bias.
-	 * 
+	 *
 	 * @param bias novi bias
 	 */
 	public void setBias(double bias) {
 		this.bias = bias;
 	}
-	
+
 	/**
 	 * Metoda koja vraca konekciju neurona za dani index neurona
 	 *
@@ -131,7 +141,7 @@ public class Neuron {
 	public Connection getConnection(int neuronIndex) {
 		return connectionLookup.get(neuronIndex);
 	}
-	
+
 	/**
 	 * Metoda za dodavanje konekcija trenutnom neuronu
 	 *
@@ -140,7 +150,7 @@ public class Neuron {
 	public void addInConnection(Connection con) {
 		Inconnections.add(con);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -151,15 +161,19 @@ public class Neuron {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Neuron other = (Neuron) obj;
-		if (id != other.id)
+		if (id != other.id) {
 			return false;
+		}
 		return true;
 	}
 
@@ -171,6 +185,6 @@ public class Neuron {
 	public ArrayList<Connection> getAllInConnections() {
 		return Inconnections;
 	}
-	
-	
+
+
 }

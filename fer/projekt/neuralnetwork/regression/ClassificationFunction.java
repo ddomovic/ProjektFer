@@ -1,5 +1,8 @@
 package fer.projekt.neuralnetwork.regression;
 
+/**
+ * Neka klasifikacijska funkcija.
+ */
 public class ClassificationFunction implements IMathFunction {
 
 	@Override

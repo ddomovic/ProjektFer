@@ -15,8 +15,19 @@ import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
 
+/**
+ * Utility razred koji sluzi za pohranu neuronske mreže. Namjena je za koristenje spremanja mreže koja radi regresiju a ne
+ * klasifikaciju.
+ */
 public class FileUtils {
 
+	/**
+	 * Vraća opis layera u string obliku.
+	 *
+	 * @param layerIndex index layera za kojih hoćemo opis(koristi se samo za ispis)
+	 * @param layer layer koji opisujemo
+	 * @return string opis
+	 */
 	public static String getLayerDescription(int layerIndex, Layer layer) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("layerIndex=" + layerIndex + System.lineSeparator());
@@ -42,6 +53,12 @@ public class FileUtils {
 		return sb.toString();
 	}
 
+	/**
+	 * Pomoćna metoda za spremnaje neuronske mreže
+	 *
+	 * @param network neuronska mreža koju spremamo
+	 * @param fileName ime pod kojim spremamo mrežu, mreža se sprema u direktorij projekta
+	 */
 	public static void saveNetwork(NeuralNetwork network, String fileName) {
 		Path p = Paths.get(fileName);
 		try (BufferedWriter bw = Files.newBufferedWriter(p, StandardCharsets.UTF_8)) {
@@ -75,6 +92,12 @@ public class FileUtils {
 		}
 	}
 
+	/**
+	 * Ucitava neuronsku mrežu iz dane putanje.
+	 *
+	 * @param network kostur mreže čiji koeficijenti će se namjestiti danim iz datoteke
+	 * @param p putanja do datoteke spremljene mreže
+	 */
 	public static void loadNeuralNetwork(NeuralNetwork network, Path p) {
 		Layer l = null;
 		Neuron n = null;
