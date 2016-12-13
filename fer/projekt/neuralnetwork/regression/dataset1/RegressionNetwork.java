@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
+import fer.projekt.neuralnetwork.FileUtils;
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
@@ -18,7 +19,6 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
-import fer.projekt.neuralnetwork.utils.FileUtils;
 
 /**
  * @author Nikola

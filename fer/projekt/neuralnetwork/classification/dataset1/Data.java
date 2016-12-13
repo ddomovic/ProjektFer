@@ -1,5 +1,8 @@
 package fer.projekt.neuralnetwork.classification.dataset1;
 
+/**
+ * Predstavlja jedan test iz dataseta.
+ */
 public class Data {
 	/**
 	 * Temperatura pacijenta
@@ -169,6 +172,5 @@ public class Data {
 	public void setNephritis(int nephritis) {
 		this.nephritis = nephritis;
 	}
-
 
 }

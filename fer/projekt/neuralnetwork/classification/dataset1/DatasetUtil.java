@@ -12,6 +12,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+/**
+ * Utility razred koji se koristi za loadanje dataseta. Dodatno, nudi metodu za splitanje dataseta u odredenom postotku za
+ * podjelu na dio za učenje i posebno na dio za testiranje.
+ */
 public class DatasetUtil {
 
 	private static List<Data> loadDataset(Path p) {
@@ -44,6 +48,14 @@ public class DatasetUtil {
 		return dataset;
 	}
 
+	/**
+	 * Ucita listu {@code Data} objekata iz dane putanje i onda ju splita na dva dijela u odredenom postotku.
+	 *
+	 * @param p putanja do dataseta
+	 * @param learnNum brojnik podjele
+	 * @param learnDeNum nazivnik podjele
+	 * @return listu {@code Data} objekata
+	 */
 	public static List<List<Data>> splitDataset(Path p, int learnNum, int learnDeNum) {
 		List<Data> dataset = DatasetUtil.loadDataset(p);
 

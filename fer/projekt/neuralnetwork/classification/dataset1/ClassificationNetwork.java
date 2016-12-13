@@ -16,36 +16,64 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
-import fer.projekt.neuralnetwork.utils.FileUtils;
 
+/**
+ * Razred koji predstavlja neuronsku mrežu koja služi za klasifikaciju.
+ */
 public class ClassificationNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static int NUMBOF_HID_NEURONS = 30;
-	public static int NUMBOF_OUTPUT = 2;
+	public static final int NUMBOF_HID_NEURONS = 30;
+	/**
+	 * Broj neurona u output layeru.
+	 */
+	public static final int NUMBOF_OUTPUT = 2;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static double MIN_WEIGHTS_FIRST_LAYER = -10d;
+	public static final double MIN_WEIGHTS_FIRST_LAYER = -10d;
 	/**
 	 * Maximalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static double MAX_WEIGHTS_FIRST_LAYER = 10d;
-
+	public static final double MAX_WEIGHTS_FIRST_LAYER = 10d;
+	/**
+	 * Brojnik koji zajedno s denumeratorom označava postotak podjele testova za učenje i testiranje.
+	 */
 	public static final int LEARN_NUMERATOR = 4;
+	/**
+	 * Nazivnik koji zajedno s denumeratorom označava postotak podjele testova za učenje i testiranje.
+	 */
 	public static final int LEARN_DENUMERATOR = 5;
+	/**
+	 * Ime pod kojim se network sprema u direktorij projekta.
+	 */
+	public static final String NETWORK_NAME = "ClassificationNetwork";
+
 	private int learningDatasetSize;
 	private List<Data> learningDataset;
 	private int testingDatasetSize;
 	private List<Data> testingDataset;
+	private ClassificationOutput[] cOutputs;
 
+	/**
+	 * Stvara novu objekt sa danom putanjom do spremljene mreže i putanjom do dataseta.
+	 * <br> Ako je {@code networkSetup} <code>null</code> onda se mreža ponovno generira i automatski sprema u direktorij
+	 * projekta pod nazivom @link
+	 *
+	 * @param networkSetup
+	 * @param datasetPath
+	 */
 	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
 		super();
-		//		ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		//ITransferFunction wavefunction = new WaveTransferFunction("/home/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
 		//ITransferFunction wavefunction = new WaveTransferFunction("D:/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
-		ITransferFunction wavefunction = new WaveTransferFunction(
-				"C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		ITransferFunction wavefunction = new WaveTransferFunction("C:/Users/David/Desktop/git/ProjektFer/PodaciZaAktivacijskuFunkciju.txt");
+		cOutputs = new ClassificationOutput[NUMBOF_OUTPUT];
+		for (int i = 0; i < NUMBOF_OUTPUT; i++) {
+			cOutputs[i] = new ClassificationOutput(0, 1);
+		}
+
 		this.addLayer(new Layer(6, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
@@ -58,12 +86,39 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 		if (networkSetup == null) {
 			this.setupNetwork();
-			FileUtils.saveNetwork(this, "ClassificationNetwork");
+			this.findBestThresholds();
+			ClassificationFileUtils.saveClassificationNetwork(this, Paths.get(NETWORK_NAME));
 		} else {
 			ITransferFunction tlinear = new LinearTransferFunction();
-			Layer outputLayer = new Layer(1, tlinear, 0);
+			Layer outputLayer = new Layer(NUMBOF_OUTPUT, tlinear, 0);
 			this.addLayer(outputLayer, 0, 1);
-			FileUtils.loadNeuralNetwork(this, networkSetup);
+			ClassificationFileUtils.loadClassificationNetwork(this, networkSetup);
+		}
+	}
+
+	/**
+	 * Getter za polje najbojih thresholdova.
+	 *
+	 * @return polje najboljih thresholdova izlaznog layera
+	 */
+	public double[] getBestThresholds() {
+		double[] bestThresholds = new double[cOutputs.length];
+		int i = 0;
+		for (ClassificationOutput cO : cOutputs) {
+			bestThresholds[i++] = cO.getThreshold();
+		}
+		return bestThresholds;
+	}
+
+	/**
+	 * Setter za postavljanje najboljih thresholdova izlaznog layera
+	 *
+	 * @param bestThresholds polje najboljih thresholdova
+	 */
+	public void setBestThresholds(double[] bestThresholds) {
+		int i = 0;
+		for (ClassificationOutput cO : cOutputs) {
+			cO.setThreshold(bestThresholds[i++]);
 		}
 	}
 
@@ -143,16 +198,75 @@ public class ClassificationNetwork extends NeuralNetwork {
 	}
 
 	/**
+	 * Pronalazi najbolje thresholdove i automatski ih postavlja u <code>ClassificationOutput</code> objekte.
+	 */
+	private void findBestThresholds() {
+		double[] bestThresholds = this.getBestThresholds();
+		for (int i = 0; i < bestThresholds.length; i++) {
+			bestThresholds[i] = findThresholdForOutput(i);
+		}
+
+		int i = 0;
+		for (ClassificationOutput cO : cOutputs) {
+			cO.setThreshold(bestThresholds[i++]);
+		}
+	}
+
+	/**
+	 * Vraca najbolji threshold za neuron indexa j.
+	 *
+	 * @param outNeuronNumber index neurona u output layeru
+	 * @param classificationOutput lista {@link ClassificationOutput} razreda za izlazni sloj
+	 * @return double vrijednost koja predstavlja najbolji threshold za dani j-ti neuron
+	 */
+	private double findThresholdForOutput(int outNeuronNumber) {
+		ClassificationOutput cOut = cOutputs[outNeuronNumber];
+		final int brojStepova = 100;
+		final double step = (cOut.getClas2() - cOut.getClas1()) / brojStepova;
+
+		double perc;
+		double bestPerc = Double.MAX_VALUE;
+		double bestThreshold = cOut.getClas1();
+
+		for (int i = 0; i < brojStepova; i++) {
+			perc = this.testOutNeuron(outNeuronNumber);
+			if (perc < bestPerc) {
+				bestPerc = perc;
+				bestThreshold = cOut.getThreshold();
+			}
+			cOut.setThreshold(cOut.getThreshold() + step);
+		}
+		return bestThreshold;
+	}
+
+	/**
+	 * Vraća postotak pogreške na datasetu na učenje za dani neuron u output layeru s indexom <code>outNeuronNumber</code>.
+	 *
+	 * @param outNeuronNumber index neurona u output layeru
+	 * @return postatak pogreske
+	 */
+	private double testOutNeuron(int outNeuronNumber) {
+		double totalErrCounter = 0;
+		for (int i = 0; i < learningDatasetSize; i++) {
+			Data learnInput = learningDataset.get(i);
+			double testIn[] = { learnInput.getTemperature(), learnInput.getNausea(), learnInput.getLumbPain(),
+					learnInput.getUrinePush(), learnInput.getMictPain(), learnInput.getBurn() };
+
+			double[] correctArray = {learnInput.getInflammation(), learnInput.getNephritis()};
+			double correct = correctArray[outNeuronNumber];
+			double out = this.runAndClassify(cOutputs, testIn)[outNeuronNumber];
+			if (correct != out) {
+				totalErrCounter++;
+			}
+		}
+		return totalErrCounter / learningDatasetSize * 100;
+	}
+
+	/**
 	 * Metoda koju koristimo kada želimo binarnu klasifikaciju
 	 *
-	 * @param clas1
-	 *            double vrijednost 1. klase
-	 * @param clas2
-	 *            double vrijednost 2. klase
-	 * @param treshhold
-	 *            threshold ispod kojeg se zaokružuje na 1. klasu
-	 * @param input
-	 *            Ulaz funkcije čiji izlaz računamo
+	 * @param cOutputs polje {@link ClassificationOutput} objekata koji sluze za klasifikaciju
+	 * @param input Ulaz funkcije čiji izlaz računamo
 	 * @return output kao vrijednost clas1 ili clas2
 	 */
 	public double[] runAndClassify(ClassificationOutput[] cOutputs, double[] input) {
@@ -168,17 +282,14 @@ public class ClassificationNetwork extends NeuralNetwork {
 		return output;
 	}
 
-	/**
-	 * Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak
+	/** Testira izgeneriranu mrežu na nekoliko random brojeva i vraća postotak
 	 * pogreške.
 	 *
-	 * @param takeRandomTests
-	 *            označava da li su input testovi generirani random ili linearno
-	 *            na intervalu
-	 *
-	 * @return postotak pogreške od očekivanog rezultata
+	 * @param cOutputs polje {@link ClassificationOutput} objekata koji sluze za klasifikaciju
+	 * @param doPrint ako je true onda printa testove, inače ne
+	 * @return postotak pogreske u %
 	 */
-	public double test(ClassificationOutput[] cOutputs, boolean doPrint) {
+	public double test(boolean doPrint) {
 		double totalErrCounter = 0;
 
 		if (doPrint) {
@@ -196,7 +307,6 @@ public class ClassificationNetwork extends NeuralNetwork {
 				totalErrCounter++;
 			}
 			if (doPrint) {
-
 				System.out.printf("%4d. \t%.1f, %.1f \t%.1f, %.1f \t %.5s %n", i + 1, correct[0], correct[1], out[0], out[1], isti);
 			}
 		}
@@ -208,59 +318,24 @@ public class ClassificationNetwork extends NeuralNetwork {
 		return avgPerc;
 	}
 
-	private double[] getBestThreshold(ClassificationNetwork network, ClassificationOutput[] cOutputs) {
-		int brojStepova = 100;
-		double[] steps = new double[NUMBOF_OUTPUT];
-		for (int i = 0; i < cOutputs.length; i++) {
-			steps[i] = (cOutputs[i].getClas2() - cOutputs[i].getClas1()) / brojStepova;
-		}
-
-		double[] bestThresholds = new double[NUMBOF_OUTPUT];
-		Arrays.fill(bestThresholds, 0);
-
-		double perc;
-		double bestPerc = 100;
-		for (int i = 0; i < brojStepova; i++) {
-			perc = network.test(cOutputs, false);
-			if (perc < bestPerc) {
-				bestPerc = perc;
-				int j = 0;
-				for (ClassificationOutput cO : cOutputs) {
-					bestThresholds[j++] = cO.getThreshold();
-				}
-			}
-			//povecaj threshold za step
-			int z = 0;
-			for (ClassificationOutput cO : cOutputs) {
-				cO.setThreshold(cO.getThreshold() + steps[z++]);
-			}
-		}
-		int i = 0;
-		for (ClassificationOutput cO : cOutputs) {
-			cO.setThreshold(bestThresholds[i++]);
-		}
-
-		return bestThresholds;
-	}
-
 	/**
 	 * The magic happens here
 	 *
-	 * @param args
-	 *            parametri komandne linije
+	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		ClassificationNetwork network = new ClassificationNetwork(null, Paths.get("diagnosis.txt"));
-		// ClassificationNetwork network = new
-		// ClassificationNetwork(Paths.get("ClassificationNetwork"),
-		// Paths.get("diagnosis.txt"));
+		final boolean radiNovuMrezu = false;
 
-		ClassificationOutput[] cOutputs = new ClassificationOutput[NUMBOF_OUTPUT];
-		for (int i = 0; i < NUMBOF_OUTPUT; i++) {
-			cOutputs[i] = new ClassificationOutput(0, 1);
+		ClassificationNetwork network = null;
+		if (radiNovuMrezu) {
+			network = new ClassificationNetwork(null, Paths.get("diagnosis.txt"));
+		} else {
+			network = new ClassificationNetwork(Paths.get(NETWORK_NAME), Paths.get("diagnosis.txt"));
 		}
-		double[] bestThresholds = network.getBestThreshold(network, cOutputs);
-		network.test(cOutputs, true);
+		for (double d : network.getBestThresholds()) {
+			System.out.println(d);
+		}
+		network.test(true);
 	}
 
 }
