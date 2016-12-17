@@ -329,6 +329,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 	public static void main(String[] args) {
 		final boolean radiNovuMrezu = false;
 
+		DataConverter konverter = new StudentConverter();
 		ClassificationNetwork network = null;
 		if (radiNovuMrezu) {
 			network = new ClassificationNetwork(null, Paths.get("classificationDataset1.txt"));
