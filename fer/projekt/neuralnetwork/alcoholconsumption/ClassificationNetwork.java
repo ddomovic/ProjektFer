@@ -1,4 +1,4 @@
-package fer.projekt.neuralnetwork.classification.dataset1;
+package fer.projekt.neuralnetwork.alcoholconsumption;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
