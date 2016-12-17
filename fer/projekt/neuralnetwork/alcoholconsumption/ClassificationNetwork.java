@@ -24,24 +24,19 @@ import fer.projekt.neuralnetwork.elements.Neuron;
  * <br> {@linkplain https://archive.ics.uci.edu/ml/datasets/Acute+Inflammations}
  *
  */
-@SuppressWarnings("javadoc")
 public class ClassificationNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static final int NUMBOF_HID_NEURONS = 30;
-	/**
-	 * Broj neurona u output layeru.
-	 */
-	public static final int NUMBOF_OUTPUT = 2;
+	public static final int NUMBOF_HID_NEURONS = 50;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MIN_WEIGHTS_FIRST_LAYER = -5d;
+	public static final double MIN_WEIGHTS_FIRST_LAYER = -0.1;
 	/**
 	 * Maximalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
-	public static final double MAX_WEIGHTS_FIRST_LAYER = 5d;
+	public static final double MAX_WEIGHTS_FIRST_LAYER = 0.1;
 	/**
 	 * Brojnik koji zajedno s denumeratorom označava postotak podjele testova za učenje i testiranje.
 	 */
@@ -50,52 +45,50 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * Nazivnik koji zajedno s denumeratorom označava postotak podjele testova za učenje i testiranje.
 	 */
 	public static final int LEARN_DENUMERATOR = 5;
-	/**
-	 * Ime pod kojim se network sprema u direktorij projekta.
-	 */
-	public static final String NETWORK_NAME = "Classification-Inflamation";
 
-	private int learningDatasetSize;
 	private List<Data> learningDataset;
-	private int testingDatasetSize;
 	private List<Data> testingDataset;
 	private ClassificationOutput[] cOutputs;
+	private int outputNeuronNumber;
 
 	/**
 	 * Stvara novu objekt sa danom putanjom do spremljene mreže i putanjom do dataseta.
 	 * <br> Ako je {@code networkSetup} <code>null</code> onda se mreža ponovno generira i automatski sprema u direktorij
 	 * projekta pod nazivom @link
+	 * @param radiNovuMrezu
 	 *
-	 * @param networkSetup
-	 * @param datasetPath
 	 */
-	public ClassificationNetwork(Path networkSetup, Path datasetPath) {
+	public ClassificationNetwork(boolean radiNovuMrezu, String networkName, Path datasetPath, DataConverter converter) {
 		super();
+		List<Data> dataList = DatasetUtil.loadDataset(datasetPath, converter);
+		List<List<Data>> returnList = DatasetUtil.splitDataset(dataList, LEARN_NUMERATOR, LEARN_DENUMERATOR);
+		learningDataset = returnList.get(0);
+		testingDataset = returnList.get(1);
+		Data nekiData = learningDataset.get(0);
+		this.outputNeuronNumber = nekiData.getOutput().length;
+
 		ITransferFunction wavefunction = new WaveTransferFunction("PodaciZaAktivacijskuFunkciju.txt");
-		cOutputs = new ClassificationOutput[NUMBOF_OUTPUT];
-		for (int i = 0; i < NUMBOF_OUTPUT; i++) {
+		cOutputs = new ClassificationOutput[outputNeuronNumber];
+		for (int i = 0; i < outputNeuronNumber; i++) {
 			cOutputs[i] = new ClassificationOutput(0, 1);
 		}
 
-		this.addLayer(new Layer(6, wavefunction, 0));
+		this.addLayer(new Layer(nekiData.getInput().length, wavefunction, 0));
 		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
 
-		List<List<Data>> returnList = DatasetUtil.splitDataset(datasetPath, LEARN_NUMERATOR, LEARN_DENUMERATOR);
-		learningDataset = returnList.get(0);
-		learningDatasetSize = learningDataset.size();
-		testingDataset = returnList.get(1);
-		testingDatasetSize = testingDataset.size();
-
-		if (networkSetup == null) {
+		if (radiNovuMrezu) {
 			this.setupNetwork();
-			this.findBestThresholds();
-			ClassificationFileUtils.saveClassificationNetwork(this, Paths.get(NETWORK_NAME));
+			for (ClassificationOutput cO : cOutputs) {
+				cO.setThreshold(10);
+			}
+			//			this.findBestThresholds();
+			ClassificationFileUtils.saveClassificationNetwork(this, Paths.get(networkName));
 		} else {
 			ITransferFunction tlinear = new LinearTransferFunction();
-			Layer outputLayer = new Layer(NUMBOF_OUTPUT, tlinear, 0);
+			Layer outputLayer = new Layer(outputNeuronNumber, tlinear, 0);
 			this.addLayer(outputLayer, 0, 1);
-			ClassificationFileUtils.loadClassificationNetwork(this, networkSetup);
+			ClassificationFileUtils.loadClassificationNetwork(this, Paths.get(networkName));
 		}
 	}
 
@@ -130,19 +123,21 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * izmedu hidden i output layera. Koristi se linearna regresija.
 	 */
 	public void setupNetwork() {
-		double x[][] = new double[learningDatasetSize][NUMBOF_HID_NEURONS + 1];
-		double y[][] = new double[learningDatasetSize][NUMBOF_OUTPUT];
-
 		Data testInput = learningDataset.get(0);
-		for (int i = 0; i < learningDatasetSize - 1; i++, testInput = learningDataset.get(i)) {
+		int outputNeuronNumber = testInput.getOutput().length;
+
+		double x[][] = new double[learningDataset.size()][NUMBOF_HID_NEURONS + 1];
+		double y[][] = new double[learningDataset.size()][outputNeuronNumber];
+
+		for (int i = 0; i < learningDataset.size() - 1; i++) {
+			testInput = learningDataset.get(i);
 			// 0.stupac mora biti = 1
 			x[i][0] = 1;
-			y[i][0] = testInput.getInflammation();
-			y[i][1] = testInput.getNephritis();
-			double in[] = { testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
-					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn() };
+			for (int z = 0; z < outputNeuronNumber; z++) {
+				y[i][z] = testInput.getOutput()[z];
+			}
 			// ostali stupci x matrice su outputi hidden neurona
-			double[] result = this.run(in);
+			double[] result = this.run(testInput.getInput());
 			int j = 1;
 			for (double re : result) {
 				x[i][j++] = re;
@@ -151,67 +146,42 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 		OLSMultipleLinearRegression regression = new OLSMultipleLinearRegression();
 		regression.setNoIntercept(true);
-		double[] aux = new double[learningDatasetSize];
-		for (int j = 0; j < learningDatasetSize; j++) {
-
-			aux[j] = y[j][0];
-
-		}
-		regression.newSampleData(aux, x);
-		double[] weights = regression.estimateRegressionParameters();
-		regression.setNoIntercept(true);
-		for (int j = 0; j < learningDatasetSize; j++) {
-
-			aux[j] = y[j][1];
-
-		}
-		regression.newSampleData(aux, x);
-		double[] weights2 = regression.estimateRegressionParameters();
 
 		// dodat jos zadnji layer(neuron)
 		ITransferFunction tlinear = new LinearTransferFunction();
-		Layer outputLayer = new Layer(2, tlinear, 0);
-		this.addLayer(outputLayer, 0, 1); // ovdje je tezina konekcija nebitna
-		// jer ju ionako namjestamo
+		Layer outputLayer = new Layer(outputNeuronNumber, tlinear, 0);
+		this.addLayer(outputLayer, 0, 1); // ovdje je tezina konekcija nebitna jer ju ionako namjestamo
 
-		Neuron n = outputLayer.getNeuron(0);
-		ArrayList<Connection> inConnections = n.getAllInConnections();
-		inConnections.forEach(new Consumer<Connection>() {
-			int i = 1;
-
-			@Override
-			public void accept(Connection c) {
-				c.setWeight(weights[i++]);
+		double[] yi = new double[learningDataset.size()];
+		for (int i = 0; i < outputNeuronNumber; i++) {
+			for (int j = 0; j < learningDataset.size(); j++) {
+				yi[j] = y[j][i];
 			}
-		});
-		n.setBias(weights[0]);
+			regression.newSampleData(yi, x);
+			double[] weights = regression.estimateRegressionParameters();
+			regression.setNoIntercept(true);
 
-		n = outputLayer.getNeuron(1);
-		inConnections = n.getAllInConnections();
-		inConnections.forEach(new Consumer<Connection>() {
-			int i = 1;
+			Neuron n = outputLayer.getNeuron(i);
+			ArrayList<Connection> inConnections = n.getAllInConnections();
+			inConnections.forEach(new Consumer<Connection>() {
+				int i = 1;
 
-			@Override
-			public void accept(Connection c) {
-				c.setWeight(weights2[i++]);
-			}
-		});
-		n.setBias(weights2[0]);
-
+				@Override
+				public void accept(Connection c) {
+					c.setWeight(weights[i++]);
+				}
+			});
+			n.setBias(weights[0]);
+		}
 	}
 
 	/**
 	 * Pronalazi najbolje thresholdove i automatski ih postavlja u <code>ClassificationOutput</code> objekte.
 	 */
 	private void findBestThresholds() {
-		double[] bestThresholds = this.getBestThresholds();
-		for (int i = 0; i < bestThresholds.length; i++) {
-			bestThresholds[i] = findThresholdForOutput(i);
-		}
-
 		int i = 0;
 		for (ClassificationOutput cO : cOutputs) {
-			cO.setThreshold(bestThresholds[i++]);
+			cO.setThreshold(findThresholdForOutput(i++));
 		}
 	}
 
@@ -250,19 +220,17 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 */
 	private double testOutNeuron(int outNeuronNumber) {
 		double totalErrCounter = 0;
-		for (int i = 0; i < learningDatasetSize; i++) {
+		for (int i = 0; i < learningDataset.size(); i++) {
 			Data learnInput = learningDataset.get(i);
-			double testIn[] = { learnInput.getTemperature(), learnInput.getNausea(), learnInput.getLumbPain(),
-					learnInput.getUrinePush(), learnInput.getMictPain(), learnInput.getBurn() };
-
-			double[] correctArray = {learnInput.getInflammation(), learnInput.getNephritis()};
+			double testIn[] = learnInput.getInput();
+			double[] correctArray =  learnInput.getOutput();
 			double correct = correctArray[outNeuronNumber];
 			double out = this.runAndClassify(cOutputs, testIn)[outNeuronNumber];
 			if (correct != out) {
 				totalErrCounter++;
 			}
 		}
-		return totalErrCounter / learningDatasetSize * 100;
+		return totalErrCounter / learningDataset.size() * 100;
 	}
 
 	/**
@@ -298,23 +266,30 @@ public class ClassificationNetwork extends NeuralNetwork {
 		if (doPrint) {
 			System.out.println("\tOCEKIVANO:\tDOBIVENO:        točna klasifikacija?:");
 		}
-		for (int i = 0; i < testingDatasetSize; i++) {
+		for (int i = 0; i < testingDataset.size(); i++) {
 			Data testInput = testingDataset.get(i);
-			double testIn[] = { testInput.getTemperature(), testInput.getNausea(), testInput.getLumbPain(),
-					testInput.getUrinePush(), testInput.getMictPain(), testInput.getBurn() };
-
-			double[] correct = {testInput.getInflammation(), testInput.getNephritis()};
+			double testIn[] = testInput.getInput();
+			double[] correct = testInput.getOutput();
+			for (int j = 0; j < correct.length; j++) {
+				correct[j] = correct[j] < 10 ? 0 : 1;
+			}
 			double[] out = this.runAndClassify(cOutputs, testIn);
 			boolean isti = Arrays.equals(correct, out);
 			if (!isti) {
 				totalErrCounter++;
 			}
 			if (doPrint) {
-				System.out.printf("%4d. \t%.1f, %.1f \t%.1f, %.1f \t %.5s %n", i + 1, correct[0], correct[1], out[0], out[1], isti);
+				StringBuffer sb = new StringBuffer();
+				sb.append(i+1 + ".\t");
+				int j = 0;
+				for (double d : out) {
+					sb.append(String.format("%.2f %.2f\t", correct[j++], d));
+				}
+				System.out.println(sb.toString());
 			}
 		}
 
-		double avgPerc = totalErrCounter / testingDatasetSize * 100;
+		double avgPerc = totalErrCounter / testingDataset.size() * 100;
 		if (doPrint) {
 			System.out.printf("%nUkupna pogreška je: %.5f%% %n", avgPerc);
 		}
@@ -327,15 +302,11 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		final boolean radiNovuMrezu = false;
+		final boolean radiNovuMrezu = true;
+		DataConverter studentConverter = new StudentConverter();
+		String datasetPath = "student_mat_dataset.txt";
 
-		DataConverter konverter = new StudentConverter();
-		ClassificationNetwork network = null;
-		if (radiNovuMrezu) {
-			network = new ClassificationNetwork(null, Paths.get("classificationDataset1.txt"));
-		} else {
-			network = new ClassificationNetwork(Paths.get(NETWORK_NAME), Paths.get("classificationDataset1.txt"));
-		}
+		ClassificationNetwork network = new ClassificationNetwork(radiNovuMrezu, "AlcoholConsumptionNetwork", Paths.get(datasetPath), studentConverter);
 		for (double d : network.getBestThresholds()) {
 			System.out.println(d);
 		}
