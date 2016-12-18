@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -59,8 +58,7 @@ public class FileUtils {
 	 * @param network neuronska mreža koju spremamo
 	 * @param fileName ime pod kojim spremamo mrežu, mreža se sprema u direktorij projekta
 	 */
-	public static void saveNetwork(NeuralNetwork network, String fileName) {
-		Path p = Paths.get(fileName);
+	public static void saveNetwork(NeuralNetwork network, Path p) {
 		try (BufferedWriter bw = Files.newBufferedWriter(p, StandardCharsets.UTF_8)) {
 			ArrayList<Layer> layerList = network.getLayerList();
 			layerList.forEach(l -> {

@@ -16,27 +16,39 @@ public class ClassificationOutput {
 	/**
 	 * Vrijednost prve klasifikacije.
 	 */
-	private double clas1;
+	private final double clas1;
 	/**
 	 * Vrijednost druge klasifikacije.
 	 */
-	private double clas2;
+	private final double clas2;
 	/**
 	 * Vrijednost thresholda za dani neuron.
 	 */
-	private double threshold;
+	private double bestThreshold;
+	/**
+	 * Označava minimalnu vrijednost od kuda se trazi bestThreshold.
+	 */
+	private final double threshStart;
+	/**
+	 * Označava maksimalnu vrijednost do kuda se trazi bestThreshold.
+	 */
+	private final double threshEnd;
 
 	/**
 	 * Kreira novu instancu ovog objekta s danim parametrima.
 	 *
 	 * @param clas1 prva klasifikacija
 	 * @param clas2 druga klasifikacija
+	 * @param threshStart minimalna vrijednost od kuda se trazi threshold
+	 * @param threshEnd maksimalna vrijednost do kuda se trazi threshold
 	 */
-	public ClassificationOutput(double clas1, double clas2) {
+	public ClassificationOutput(double clas1, double clas2, double threshStart, double threshEnd) {
 		super();
 		this.clas1 = clas1;
 		this.clas2 = clas2;
-		this.threshold = clas1;
+		this.threshStart = threshStart;
+		this.threshEnd = threshEnd;
+		this.bestThreshold = threshStart;
 	}
 
 	/**
@@ -47,13 +59,6 @@ public class ClassificationOutput {
 	}
 
 	/**
-	 * @param clas1 the clas1 to set
-	 */
-	public void setClas1(double clas1) {
-		this.clas1 = clas1;
-	}
-
-	/**
 	 * @return the clas2
 	 */
 	public double getClas2() {
@@ -61,26 +66,31 @@ public class ClassificationOutput {
 	}
 
 	/**
-	 * @param clas2 the clas2 to set
+	 * @return the bestThreshold
 	 */
-	public void setClas2(double clas2) {
-		this.clas2 = clas2;
+	public double getBestThreshold() {
+		return bestThreshold;
 	}
 
 	/**
-	 * @return the threshold
+	 * @param bestThreshold the bestThreshold to set
 	 */
-	public double getThreshold() {
-		return threshold;
+	public void setBestThreshold(double bestThreshold) {
+		this.bestThreshold = bestThreshold;
 	}
 
 	/**
-	 * @param threshold the threshold to set
+	 * @return the threshStart
 	 */
-	public void setThreshold(double threshold) {
-		this.threshold = threshold;
+	public double getThreshStart() {
+		return threshStart;
 	}
 
-
+	/**
+	 * @return the threshEnd
+	 */
+	public double getThreshEnd() {
+		return threshEnd;
+	}
 
 }

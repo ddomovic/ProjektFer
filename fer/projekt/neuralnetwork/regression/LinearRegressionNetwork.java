@@ -56,7 +56,7 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 
 		if (fileName == null) {
 			this.setupNetwork();
-			FileUtils.saveNetwork(this, "LinearRegressionNetwork");
+			FileUtils.saveNetwork(this, Paths.get("LinearRegressionNetwork"));
 		} else {
 			ITransferFunction tlinear = new LinearTransferFunction();
 			Layer outputLayer = new Layer(1, tlinear, 0);
