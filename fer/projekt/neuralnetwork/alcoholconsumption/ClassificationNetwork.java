@@ -63,6 +63,8 @@ public class ClassificationNetwork extends NeuralNetwork {
 	public ClassificationNetwork(boolean radiNovuMrezu, ClassificationOutput[] cOutputs, String networkName, Path datasetPath, DataConverter converter) {
 		super();
 		List<Data> dataList = DatasetUtil.loadDataset(datasetPath, converter);
+		this.normalize(dataList, converter);
+
 		List<List<Data>> returnList = DatasetUtil.splitDataset(dataList, LEARN_NUMERATOR, LEARN_DENUMERATOR);
 		learningDataset = returnList.get(0);
 		testingDataset = returnList.get(1);
@@ -70,15 +72,16 @@ public class ClassificationNetwork extends NeuralNetwork {
 		this.outputNeuronNumber = nekiData.getOutput().length;
 
 		ITransferFunction wavefunction = new WaveTransferFunction("PodaciZaAktivacijskuFunkciju.txt");
-		this.addLayer(new Layer(nekiData.getInput().length, wavefunction, 0));
-		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
+		this.addLayer(new Layer(nekiData.getInput().length, wavefunction, 0));	//input layer
+		//		this.addLayer(new Layer(10_000, wavefunction, 1), -1, 1);
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
 
 		if (radiNovuMrezu) {
 			this.setupNetwork();
 			if (cOutputs != null) {	//ako nije null onda radi klasifikaciju, inace radi regresiju
 				this.cOutputs = cOutputs;
-				this.findBestThresholds();
+				//				this.findBestThresholds();
+				cOutputs[0].setBestThreshold(0.4d);
 				ClassificationFileUtils.saveClassificationNetwork(this, Paths.get(networkName));
 			} else {
 				FileUtils.saveNetwork(this, Paths.get(networkName));
@@ -94,6 +97,32 @@ public class ClassificationNetwork extends NeuralNetwork {
 				FileUtils.loadNeuralNetwork(this, Paths.get(networkName));
 			}
 		}
+	}
+
+	/**
+	 * @param dataList
+	 * @param converter
+	 */
+	private void normalize(List<Data> dataList, DataConverter converter) {
+		Double[] minInputValues = converter.getMinInputValues();
+		Double[] maxInputValues = converter.getMaxInputValues();
+		dataList.forEach(d -> {
+			double[] input = d.getInput();
+			for (int i = 0; i < input.length; i ++) {
+				if (minInputValues[i] != null) {
+					input[i] = (input[i] - minInputValues[i]) / (maxInputValues[i] - minInputValues[i]);
+				}
+			}
+
+			int inputSize = input.length;
+			double[] output = d.getOutput();
+			for (int i = 0; i < output.length; i ++) {
+				if (minInputValues[i +  inputSize] != null) {
+					output[i] = (output[i] - minInputValues[i + inputSize]) /
+							(maxInputValues[i + inputSize] - minInputValues[i + inputSize]);
+				}
+			}
+		});
 	}
 
 	/**
@@ -364,9 +393,9 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * @param args parametri komandne linije
 	 */
 	public static void main(String[] args) {
-		final boolean radiNovuMrezu = false;
+		final boolean radiNovuMrezu = true;
 		final boolean radiRegresiju = false;	//ako je false onda radi klasifikaciju
-		ClassificationOutput[] cOutputs = {new ClassificationOutput(0, 1, 0, 20)};
+		ClassificationOutput[] cOutputs = {new ClassificationOutput(0, 1, 0, 1)};
 		if (radiRegresiju) {
 			cOutputs = null;	//REGRESIJA
 		}

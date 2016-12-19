@@ -40,7 +40,7 @@ public class NeuralNetwork {
 
 	/**
 	 * Dodaje novi layer u mrežu i spaja ga s prijašnjim.
-	 * <br> Tezine {@link Connection}-a koji ga spajaju s prijasnjim su random vrijednosti izmedu 0 i 1.
+	 * <br> Tezine {@link Connection}-a koji ga spajaju s prijasnjim su random vrijednosti izmedu minWeight i maxWeight.
 	 *
 	 * @param layer zadnji(najdesniji) {@link Layer} u mrezi
 	 * @param minWeight minimalna tezina konekcije s prijasnjiim layerom
