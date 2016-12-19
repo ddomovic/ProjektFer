@@ -1,11 +1,14 @@
 package fer.projekt.neuralnetwork.elements;
 
+import java.util.Random;
+
 /**
  * Razred koji predstavlja jednu konekciju izmedu dva neurona
  *
  * @version 1.0
  */
 public class Connection {
+	private static Random random = new Random();
 	/**
 	 * Counter konekcija
 	 */
@@ -38,12 +41,13 @@ public class Connection {
 	 * @param maxWeight minimalna tezina konekcije
 	 */
 	public Connection(Neuron left, Neuron right, double minWeight, double maxWeight){
-		this(left, right, Math.random() * (maxWeight - minWeight) + minWeight);
+		this(left, right, random.nextGaussian()*0.01* (maxWeight - minWeight) + (maxWeight -minWeight));
+		//this(left, right, Math.random() * (maxWeight - minWeight) + minWeight);
 	}
-	
+
 	/**
 	 * Stvori i inicijalizira konekciju izmedu dva neurona.
-	 * 
+	 *
 	 * @param left lijevi neuron
 	 * @param right desni neuron
 	 * @param weight tezina neurona

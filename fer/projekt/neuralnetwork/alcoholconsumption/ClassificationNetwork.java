@@ -48,12 +48,12 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * Brojnik koji zajedno s denumeratorom označava postotak podjele testova za
 	 * učenje i testiranje.
 	 */
-	public static final int LEARN_NUMERATOR = 4;
+	public static final int LEARN_NUMERATOR = 9;
 	/**
 	 * Nazivnik koji zajedno s denumeratorom označava postotak podjele testova
 	 * za učenje i testiranje.
 	 */
-	public static final int LEARN_DENUMERATOR = 5;
+	public static final int LEARN_DENUMERATOR = 10;
 
 	private List<Data> learningDataset;
 	private List<Data> testingDataset;
@@ -481,11 +481,15 @@ public class ClassificationNetwork extends NeuralNetwork {
 			cOutputs = null; // REGRESIJA
 		}
 		final String networkName = "AlcoholConsumptionNetwork";
-		String datasetPath = "student_mat_dataset.txt";
+		//		String datasetPath = "student_por_dataset.txt";
+		String datasetPath = "servo.data";
 		DataConverter studentConverter = new StudentConverter();
+		DataConverter servoConverter = new ServoConverter();
 
+		//		ClassificationNetwork network = new ClassificationNetwork(radiNovuMrezu, cOutputs, networkName,
+		//				Paths.get(datasetPath), studentConverter);
 		ClassificationNetwork network = new ClassificationNetwork(radiNovuMrezu, cOutputs, networkName,
-				Paths.get(datasetPath), studentConverter);
+				Paths.get(datasetPath), servoConverter);
 		if (!radiRegresiju) {
 			System.out.print("Best threshold: ");
 			for (double d : network.getBestThresholds()) {
