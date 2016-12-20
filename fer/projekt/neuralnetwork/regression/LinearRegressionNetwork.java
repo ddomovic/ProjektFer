@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
-import fer.projekt.neuralnetwork.FileUtils;
 import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
@@ -15,6 +14,7 @@ import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
+import fer.projekt.neuralnetwork.utils.RegressionFileUtils;
 
 /**
  * {@link NeuralNetwork} koji koristi linearnu regresiju za izračunavanje neke
@@ -56,12 +56,12 @@ public class LinearRegressionNetwork extends NeuralNetwork {
 
 		if (fileName == null) {
 			this.setupNetwork();
-			FileUtils.saveNetwork(this, Paths.get("LinearRegressionNetwork"));
+			RegressionFileUtils.saveNetwork(this, Paths.get("LinearRegressionNetwork"));
 		} else {
 			ITransferFunction tlinear = new LinearTransferFunction();
 			Layer outputLayer = new Layer(1, tlinear, 0);
 			this.addLayer(outputLayer, 0, 1);
-			FileUtils.loadNeuralNetwork(this, fileName);
+			RegressionFileUtils.loadNeuralNetwork(this, fileName);
 		}
 	}
 

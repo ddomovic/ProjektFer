@@ -1,4 +1,4 @@
-package fer.projekt.neuralnetwork.alcoholconsumption;
+package fer.projekt.neuralnetwork;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,14 +9,18 @@ import java.util.function.Consumer;
 
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
-import fer.projekt.neuralnetwork.FileUtils;
-import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.activationfunction.ITransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.LinearTransferFunction;
 import fer.projekt.neuralnetwork.activationfunction.WaveTransferFunction;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
+import fer.projekt.neuralnetwork.utils.ClassificationFileUtils;
+import fer.projekt.neuralnetwork.utils.ClassificationOutput;
+import fer.projekt.neuralnetwork.utils.Data;
+import fer.projekt.neuralnetwork.utils.DataConverter;
+import fer.projekt.neuralnetwork.utils.DatasetUtil;
+import fer.projekt.neuralnetwork.utils.RegressionFileUtils;
 
 /**
  * Razred koji predstavlja neuronsku mrežu koja služi za klasifikaciju.
@@ -24,18 +28,12 @@ import fer.projekt.neuralnetwork.elements.Neuron;
  * <p>
  * Dataset koji ima 6 inputa i koristi se za izračun mogućih bolesti(upala).
  * <br>
- * {@linkplain https://archive.ics.uci.edu/ml/datasets/Acute+Inflammations}
- *
  */
-public class ClassificationNetwork extends NeuralNetwork {
-	/**
-	 * //ako je false onda radi klasifikaciju
-	 */
-	public static final boolean radiRegresiju = true;
+public class ClassificationRegressionNetwork extends NeuralNetwork {
 	/**
 	 * Broj neurona u hidden layeru.
 	 */
-	public static final int NUMBOF_HID_NEURONS = 30;
+	public static final int NUMBOF_HID_NEURONS = 40;
 	/**
 	 * Minimalna težina na konekcijama izmedu prvog i drugog layera.
 	 */
@@ -57,8 +55,11 @@ public class ClassificationNetwork extends NeuralNetwork {
 
 	private List<Data> learningDataset;
 	private List<Data> testingDataset;
+
 	private ClassificationOutput[] cOutputs;
 	private int outputNeuronNumber;
+	private DataConverter converter;
+	private boolean radiRegresiju;
 
 	/**
 	 * Stvara novu objekt sa danom putanjom do spremljene mreže i putanjom do
@@ -70,116 +71,77 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * @param radiKlasifikaciju
 	 *
 	 */
-	public Double[] outputMinValue;
-	public Double[] outputMaxValue;
-
-	public ClassificationNetwork(boolean radiNovuMrezu, ClassificationOutput[] cOutputs, String networkName,
+	public ClassificationRegressionNetwork(boolean radiNovuMrezu, ClassificationOutput[] cOutputs, String networkName,
 			Path datasetPath, DataConverter converter) {
 		super();
 		List<Data> dataList = DatasetUtil.loadDataset(datasetPath, converter);
-		Data nekiData = dataList.get(0);
-		this.outputNeuronNumber = nekiData.getOutput().length;
-		outputMinValue = new Double[outputNeuronNumber];
-		outputMaxValue = new Double[outputNeuronNumber];
-		this.normalize(dataList, converter);
-
 		List<List<Data>> returnList = DatasetUtil.splitDataset(dataList, LEARN_NUMERATOR, LEARN_DENUMERATOR);
-		learningDataset = returnList.get(0);
-		testingDataset = returnList.get(1);
+		this.learningDataset = returnList.get(0);
+		this.testingDataset = returnList.get(1);
+		this.outputNeuronNumber = dataList.get(0).getOutput().length;
+		this.converter = converter;
+		this.cOutputs = cOutputs;
+		this.radiRegresiju = cOutputs == null;
 
-
+		normalize(learningDataset, true);
+		normalize(testingDataset, false);
 
 		ITransferFunction wavefunction = new WaveTransferFunction("PodaciZaAktivacijskuFunkciju.txt");
-		this.addLayer(new Layer(nekiData.getInput().length, wavefunction, 0)); // input
-		// layer
-		//this.addLayer(new Layer(1_000, wavefunction, 1), -1, 1);
+		this.addLayer(new Layer(dataList.get(0).getInput().length, wavefunction, 0));
 		this.addLayer(new Layer(NUMBOF_HID_NEURONS, wavefunction, 0), MIN_WEIGHTS_FIRST_LAYER, MAX_WEIGHTS_FIRST_LAYER);
 
 		if (radiNovuMrezu) {
 			this.setupNetwork();
-			if (cOutputs != null) { // ako nije null onda radi klasifikaciju,
-				// inace radi regresiju
-				this.cOutputs = cOutputs;
+			if (!radiRegresiju) {
+				learningDataset.forEach(d -> denormalizeOutput(d.getOutput()));
 				this.findBestThresholds();
-				//				cOutputs[0].setBestThreshold(0.4d);
 				ClassificationFileUtils.saveClassificationNetwork(this, Paths.get(networkName));
 			} else {
-				FileUtils.saveNetwork(this, Paths.get(networkName));
+				RegressionFileUtils.saveNetwork(this, Paths.get(networkName));
 			}
 		} else {
 			ITransferFunction tlinear = new LinearTransferFunction();
 			Layer outputLayer = new Layer(outputNeuronNumber, tlinear, 0);
 			this.addLayer(outputLayer, 0, 1);
-			if (cOutputs != null) {
-				this.cOutputs = cOutputs;
+			if (!radiRegresiju) {
 				ClassificationFileUtils.loadClassificationNetwork(this, Paths.get(networkName));
 			} else {
-				FileUtils.loadNeuralNetwork(this, Paths.get(networkName));
+				RegressionFileUtils.loadNeuralNetwork(this, Paths.get(networkName));
 			}
 		}
-		this.denormalizeData(dataList, converter);
 	}
 
-	/**
-	 * @param dataList
-	 * @param converter
-	 */
-	private void denormalizeData(List<Data> dataList, DataConverter converter) {
-		Double[] minInputValues = converter.getMinInputValues();
-		Double[] maxInputValues = converter.getMaxInputValues();
-		dataList.forEach(d -> {
-			double[] input = d.getInput();
-			//			for (int i = 0; i < input.length; i++) {
-			//				if (minInputValues[i] != null) {
-			//					input[i] = (input[i]) * (maxInputValues[i] - minInputValues[i]) + minInputValues[i];
-			//				}
-			//			}
-
-			int inputSize = input.length;
-			double[] output = d.getOutput();
-			for (int i = 0; i < output.length; i++) {
-				if (minInputValues[i + inputSize] != null) {
-					output[i] = (output[i]) * (maxInputValues[i + inputSize] - minInputValues[i + inputSize])
-							+ minInputValues[i + inputSize];
-				}
-			}
-		});
-
-	}
 	/**
 	 * @param output
 	 * @return
 	 */
 	private double[] denormalizeOutput(double[] output) {
-		for(int i = 0; i< output.length; i++){
-			output[i] = output[i]*(outputMaxValue[i] - outputMinValue[i]) + outputMinValue[i];
+		Double[] outMinValues = converter.getOutMinValues();
+		Double[] outMaxValues = converter.getOutMaxValues();
+		for(int i = 0; i< output.length; i++) {
+			output[i] = output[i]*(outMaxValues[i] - outMinValues[i]) + outMinValues[i];
 		}
 		return output;
 	}
 
 	/**
 	 * @param dataList
-	 * @param converter
 	 */
-	private void normalize(List<Data> dataList, DataConverter converter) {
-		Double[] minInputValues = converter.getMinInputValues();
-		Double[] maxInputValues = converter.getMaxInputValues();
+	private void normalize(List<Data> dataList, boolean normalizeOutputs) {
+		Double[] inMinValues = converter.getInMinValues();
+		Double[] inMaxValues = converter.getInMaxValues();
+		Double[] outMinValues = converter.getOutMinValues();
+		Double[] outMaxValues = converter.getOutMaxValues();
+
 		dataList.forEach(d -> {
 			double[] input = d.getInput();
 			for (int i = 0; i < input.length; i++) {
-				if (minInputValues[i] != null) {
-					input[i] = (input[i] - minInputValues[i]) / (maxInputValues[i] - minInputValues[i]);
-				}
+				input[i] = (input[i] - inMinValues[i]) / (inMaxValues[i] - inMinValues[i]);
 			}
-
-			int inputSize = input.length;
-			double[] output = d.getOutput();
-			for (int i = 0; i < output.length; i++) {
-				outputMinValue[i] = minInputValues[i+inputSize];
-				outputMaxValue[i] = maxInputValues[i + inputSize];
-				if (outputMinValue[i] != null) {
-					output[i] = (output[i] - minInputValues[i + inputSize])
-							/ (outputMaxValue[i] - minInputValues[i + inputSize]);
+			if (normalizeOutputs) {
+				double[] output = d.getOutput();
+				for (int i = 0; i < output.length; i++) {
+					output[i] = (output[i] - outMinValues[i]) / (outMaxValues[i] - outMinValues[i]);
 				}
 			}
 		});
@@ -191,7 +153,7 @@ public class ClassificationNetwork extends NeuralNetwork {
 	 * @return polje najboljih thresholdova izlaznog layera
 	 */
 	public double[] getBestThresholds() {
-		if (cOutputs == null) {
+		if (radiRegresiju) {
 			throw new IllegalArgumentException("Mreža se koristi kao regresija!");
 		}
 		double[] bestThresholds = new double[cOutputs.length];
@@ -352,16 +314,12 @@ public class ClassificationNetwork extends NeuralNetwork {
 	public double[] runAndClassify(ClassificationOutput[] cOutputs, double[] input) {
 		double[] output = run(input);
 		output = denormalizeOutput(output);
-		if (!radiRegresiju) {
-			{
-				for (int i = 0; i < cOutputs.length; i++) {
-					ClassificationOutput cOut = cOutputs[i];
-					if (output[i] <= cOut.getBestThreshold()) {
-						output[i] = cOut.getClas1();
-					} else {
-						output[i] = cOut.getClas2();
-					}
-				}
+		for (int i = 0; i < cOutputs.length; i++) {
+			ClassificationOutput cOut = cOutputs[i];
+			if (output[i] <= cOut.getBestThreshold()) {
+				output[i] = cOut.getClas1();
+			} else {
+				output[i] = cOut.getClas2();
 			}
 		}
 		return output;
@@ -383,10 +341,10 @@ public class ClassificationNetwork extends NeuralNetwork {
 		if (doPrint) {
 			System.out.println("Rezultati:");
 		}
-		if (cOutputs != null) {
-			return testirajKlasifikaciju(doPrint);
-		} else {
+		if (radiRegresiju) {
 			return testirajRegresiju(doPrint);
+		} else {
+			return testirajKlasifikaciju(doPrint);
 		}
 	}
 
@@ -441,7 +399,8 @@ public class ClassificationNetwork extends NeuralNetwork {
 			Data testInput = testingDataset.get(i);
 			double in[] = testInput.getInput();
 			double[] correct = testInput.getOutput();
-			double[] out = this.runAndClassify(null, in);
+			double[] out = run(in);
+			out = denormalizeOutput(out);
 
 			for (int j = 0; j < correct.length; j++) {
 				RMSE[j] += Math.pow(correct[j] - out[j], 2);
@@ -466,37 +425,6 @@ public class ClassificationNetwork extends NeuralNetwork {
 		}
 		System.out.printf("%ntotalRMSE = %.2f", totalRMSE);
 		return totalRMSE;
-	}
-
-	/**
-	 * The magic happens here
-	 *
-	 * @param args
-	 *            parametri komandne linije
-	 */
-	public static void main(String[] args) {
-		final boolean radiNovuMrezu = true;
-		ClassificationOutput[] cOutputs = { new ClassificationOutput(0, 1, 0, 1) };
-		if (radiRegresiju) {
-			cOutputs = null; // REGRESIJA
-		}
-		final String networkName = "AlcoholConsumptionNetwork";
-		//		String datasetPath = "student_por_dataset.txt";
-		String datasetPath = "servo.data";
-		DataConverter studentConverter = new StudentConverter();
-		DataConverter servoConverter = new ServoConverter();
-
-		//		ClassificationNetwork network = new ClassificationNetwork(radiNovuMrezu, cOutputs, networkName,
-		//				Paths.get(datasetPath), studentConverter);
-		ClassificationNetwork network = new ClassificationNetwork(radiNovuMrezu, cOutputs, networkName,
-				Paths.get(datasetPath), servoConverter);
-		if (!radiRegresiju) {
-			System.out.print("Best threshold: ");
-			for (double d : network.getBestThresholds()) {
-				System.out.println(d);
-			}
-		}
-		network.test(true);
 	}
 
 }

@@ -1,7 +1,7 @@
 /**
  *
  */
-package fer.projekt.neuralnetwork.alcoholconsumption;
+package fer.projekt.neuralnetwork.utils;
 
 /**
  * Predstavlja specifikacije jednog output neruona kod {@code ClassificationNetwork} neuronske mreže.

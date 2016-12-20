@@ -1,4 +1,4 @@
-package fer.projekt.neuralnetwork.alcoholconsumption;
+package fer.projekt.neuralnetwork.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,7 +1,4 @@
-/**
- *
- */
-package fer.projekt.neuralnetwork.classification.dataset1;
+package fer.projekt.neuralnetwork.utils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,31 +7,60 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
-import fer.projekt.neuralnetwork.FileUtils;
+import fer.projekt.neuralnetwork.NeuralNetwork;
 import fer.projekt.neuralnetwork.elements.Connection;
 import fer.projekt.neuralnetwork.elements.Layer;
 import fer.projekt.neuralnetwork.elements.Neuron;
 
 /**
- * Util razred za spremanje {@link ClassificationNetwork} neuronske mreže.
- * <br> Note: razlika od običnog spremanja neuronske mreže je da se ovdje jos dodatno spremaju i najbolji thresholdi mreže.
- *
- * @author David
- *
+ * Utility razred koji sluzi za pohranu neuronske mreže. Namjena je za koristenje spremanja mreže koja radi regresiju a ne
+ * klasifikaciju.
  */
-public class ClassificationFileUtils {
+public class RegressionFileUtils {
 
 	/**
-	 * Sprema danu mrezu za klasifikaciju u datoteku s danim imenom <code>fileName</code>.
+	 * Vraća opis layera u string obliku.
 	 *
-	 * @param network {@link ClassificationNetwork} neuronska mreža
-	 * @param p path do datoteke u kojoj ce se mreza spremiti
+	 * @param layerIndex index layera za kojih hoćemo opis(koristi se samo za ispis)
+	 * @param layer layer koji opisujemo
+	 * @return string opis
 	 */
-	public static void saveClassificationNetwork(ClassificationNetwork network, Path p) {
+	public static String getLayerDescription(int layerIndex, Layer layer) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("layerIndex=" + layerIndex + System.lineSeparator());
+
+		layer.forEach(new Consumer<Neuron>() {
+			int nIndex = 0;
+
+			@Override
+			public void accept(Neuron n) {
+				sb.append("nIndex=" + nIndex++ + " bias=" + n.getBias() + System.lineSeparator());
+
+				List<Connection> connections = n.getAllInConnections();
+				connections.forEach(new Consumer<Connection>() {
+					int cIndex = 0;
+
+					@Override
+					public void accept(Connection c) {
+						sb.append("cIndex=" + cIndex++ + " weight=" + c.getWeight() + System.lineSeparator());
+					}
+				});
+			}
+		});
+		return sb.toString();
+	}
+
+	/**
+	 * Pomoćna metoda za spremnaje neuronske mreže
+	 *
+	 * @param network neuronska mreža koju spremamo
+	 * @param fileName ime pod kojim spremamo mrežu, mreža se sprema u direktorij projekta
+	 */
+	public static void saveNetwork(NeuralNetwork network, Path p) {
 		try (BufferedWriter bw = Files.newBufferedWriter(p, StandardCharsets.UTF_8)) {
-			//zapisivanje broja neurona po layerima
 			ArrayList<Layer> layerList = network.getLayerList();
 			layerList.forEach(l -> {
 				try {
@@ -44,20 +70,13 @@ public class ClassificationFileUtils {
 				}
 			});
 			bw.newLine();
-			// zapisivanje thresholdova
-			double[] bestThresholds = network.getBestThresholds();
-			bw.write("thresholds:");
-			for (double b : bestThresholds) {
-				bw.write(b + " ");
-			}
-			bw.newLine();
 
 			layerList.forEach(new Consumer<Layer>() {
 				int layerIndex = 0;
 
 				@Override
 				public void accept(Layer l) {
-					String layerDescription = FileUtils.getLayerDescription(layerIndex, l);
+					String layerDescription = RegressionFileUtils.getLayerDescription(layerIndex, l);
 					layerIndex++;
 					try {
 						bw.write(layerDescription);
@@ -73,12 +92,12 @@ public class ClassificationFileUtils {
 	}
 
 	/**
-	 * Metoda koja ucitava neuronsku mrežu s dane putanje u dani objekt {@link ClassificationNetwork} neuronske mreže.
+	 * Ucitava neuronsku mrežu iz dane putanje.
 	 *
-	 * @param network {@link ClassificationNetwork} neuronska mreža
-	 * @param p putanja do datoteke u kojoj je mreža spremljena
+	 * @param network kostur mreže čiji koeficijenti će se namjestiti danim iz datoteke
+	 * @param p putanja do datoteke spremljene mreže
 	 */
-	public static void loadClassificationNetwork(ClassificationNetwork network, Path p) {
+	public static void loadNeuralNetwork(NeuralNetwork network, Path p) {
 		Layer l = null;
 		Neuron n = null;
 		try (BufferedReader br = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
@@ -97,22 +116,6 @@ public class ClassificationFileUtils {
 						"Broj layera ili broj neurona u njima ne odgovara definiciji networka u file-u!"
 								+ "\nTraženi broj layera je: " + line + " a dobiveni: " + sb.toString());
 			}
-
-			// ucitavanje najboljih thresholda za neuronsku mrežu
-			String thresholds = null;
-			if (br.ready()) {
-				thresholds = br.readLine();
-			}
-			String[] thresholdArgs = thresholds.trim().substring(thresholds.indexOf(':') + 1).split(" ");
-			double[] bestThresholds = new double[thresholdArgs.length];
-			int i = 0;
-			for (String t : thresholdArgs) {
-				if (!t.isEmpty()) {
-					bestThresholds[i++] = Double.valueOf(t);
-				}
-			}
-
-			network.setBestThresholds(bestThresholds);
 
 			while (br.ready() && (line = br.readLine()) != null) {
 				if (line.startsWith("layerIndex")) {

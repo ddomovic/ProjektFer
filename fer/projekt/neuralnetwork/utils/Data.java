@@ -1,7 +1,7 @@
 /**
  *
  */
-package fer.projekt.neuralnetwork.alcoholconsumption;
+package fer.projekt.neuralnetwork.utils;
 
 /**
  * @author David
@@ -21,7 +21,7 @@ public class Data {
 	 * @param input
 	 * @param output
 	 */
-	Data(double[] input, double[] output){
+	public Data(double[] input, double[] output){
 		this.input = input;
 		this.output = output;
 	}
